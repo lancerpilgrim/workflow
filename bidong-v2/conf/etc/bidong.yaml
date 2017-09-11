@@ -1,0 +1,40 @@
+database:
+    master:
+        host: 127.0.0.1
+        port: 3306
+        user: root
+        password: '123456'
+        db: bidongv2
+        charset: utf8
+    slave:
+        host: 127.0.0.1
+        port: 3306
+        user: root
+        password: '123456'
+        db: bidongv2
+        charset: utf8
+    pool_recycle: 60
+    echo: 0
+
+mongodb:
+    url: mongodb://127.0.0.1:27017/bidongv2
+
+redis:
+    host: 127.0.0.1
+    password: ''
+    port: 6379
+
+cors_allow_whitelist: '*'
+
+jwt_secret: g3Iz7Idt26sxKoMe9FKK7HJGzwzTr4JPV8U19LLi65o=
+rotate_log_dir: /tmp/log/bidong-v2
+
+qiniu:
+    domain: or7x902xd.bkt.clouddn.com
+    bucket: test
+    access_key: VaR1ufSHe8Z1uKD-cw5lWvzpvgP2IPoJgNy22orS
+    secret_key: t4w97Ul7YS7Ifqr6qxetP_ux_KB-yegtjSfATlj-
+
+celery:
+    broker: redis://localhost
+    backend: redis://localhost

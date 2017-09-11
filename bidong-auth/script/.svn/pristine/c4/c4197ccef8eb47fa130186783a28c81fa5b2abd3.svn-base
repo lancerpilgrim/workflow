@@ -1,0 +1,67 @@
+# vim /etc/rc.d/rc.local
+# 
+# BOOTSTRAP=/web/script/rc.local
+# maintain_server() {
+#     if [ ! -x $BOOTSTRAP ]; then
+#         chmod +x $BOOTSTRAP
+#     fi
+#     $BOOTSTRAP $1
+#     return $ES
+# }
+# 
+# case "$1" in
+#     start)
+#     maintain_server $1
+#     ;;
+#     stop)
+#     maintain_server $1
+#     ;;
+# esac
+PATH=/sbin:/usr/sbin:/bin:/usr/bin
+SCRIPT_PATH=/web/script
+
+BIDONG=bidong
+CMS=cms
+NIOT=niot
+
+PORTAL=portal
+RADIUS=radius
+
+LOG=/var/log/ssboot.log
+
+echo "Begin start services" > $LOG
+
+# # 1. nginx
+# set +e
+# /etc/init.d/nginx start
+# set -e
+# errno=$?
+# if [ $errno -ne 0 ]; then
+#     echo "nginx started failed, errno: $errno" >> $LOG
+#     exit 1
+# fi
+# 
+# # 2. rabbitmq
+# set +e
+# /etc/init.d/rabbitmq-server start
+# set -e
+# errno=$?
+# if [ $errno -ne 0 ]; then
+#     echo "rabbitmq started failed, errno: $errno" >> $LOG
+#     exit 1
+# fi
+
+# 3. start web applications
+if [ -d $SCRIPT_PATH/init.d ] 
+then
+    for s in $SCRIPT_PATH/init.d/app_*
+    do
+        set +e
+        $s $1
+        set -e
+    done
+    
+fi
+
+echo -n "All services started ..." >> $LOG
+exit 0

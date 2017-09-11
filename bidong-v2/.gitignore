@@ -1,0 +1,8 @@
+__pycache__
+gen-py
+*.pyc
+.DS_Store
+*.DS_Store
+.idea
+/**/.idea
+

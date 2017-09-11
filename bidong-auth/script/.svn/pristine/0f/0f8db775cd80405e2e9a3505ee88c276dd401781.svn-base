@@ -1,0 +1,61 @@
+#!/bin/bash
+#
+###
+# Portal service. {start, stop}
+#
+#
+# 2015/03/31    hayate
+set -e
+
+PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
+CELERY=/usr/local/bin/celery
+# PYTHON=/usr/local/python-2.7.9/bin/python
+# PYTHON=/usr/bin/python2.7
+# LOG=/var/log/radiusd
+TASK_PATH=/web/radius
+TASK=portal
+APP=task
+
+LOG=/var/log/celery
+
+USER=xujia
+
+DESC=celery_task
+
+# test -x $TWISTD || exit 1
+test -x $CELERY || exit 1
+
+# create necessary logs directory
+if [ ! -d $LOG ]; then
+    mkdir $LOG
+fi
+chown $USER:$USER $LOG
+
+case "$1" in
+    start)
+        echo "Starting $DESC service: "
+        cd $TASK_PATH
+        # sudo -u $USER $CELERY --app=task worker --pidfile=$TASK_PID -l info > /dev/null 2>&1 &
+        sudo -u $USER $CELERY multi start $TASK --app=$APP --concurrency=2 \
+            --pidfile=$LOG/%n.pid --logfile=$LOG/%n%I.log --loglevel=info
+        echo "$DESC."
+        ;;
+    stop)
+        echo "Stop $DESC service: "
+        # kill $(cat $TASK_PID) && rm -rf $TASK_PID
+        $CELERY multi stopwait $TASK --pidfile=$LOG/$TASK_%n.pid
+        echo "$DESC stoped."
+        ;;
+    restart)
+        echo "Restart $DESC server: "
+        sudo -u $USER $CELERY multi restart $TASK --app=task \
+            --pidfile=$LOG/$TASK_%n.pid --logfile=$LOG/$TASK_%n.log 
+        echo "$DESC."
+        ;;
+    *)
+        echo "Usage: $DESC {start|stop|restart}"
+        exit 1
+        ;;
+esac
+exit 0
+

@@ -1,0 +1,69 @@
+#!/bin/bash
+#
+###
+# Portal service. {start, stop}
+#
+#
+# 2015/03/31    hayate
+set -e
+
+PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
+# PYTHON=/usr/local/python-2.7.9/bin/python
+PYTHON=/usr/bin/python2.7
+LOG=/var/log/bidong
+BIDONG_PATH=/web/web
+BIDONG_APP=$BIDONG_PATH/main.py
+PORT=8080
+# PORT=8080
+PROCESS_NUM=1
+PID_PATH=/var/run/bidong
+
+DESC=bidong
+
+test -x $PYTHON || exit 1
+
+# create necessary logs directory
+
+if [ ! -d $LOG ]; then
+    mkdir $LOG
+fi
+if [ ! -d $PID_PATH ]; then
+    mkdir $PID_PATH
+fi
+
+
+case "$1" in
+    start)
+        echo "Starting $DESC service: "
+        cd $BIDONG_PATH
+        index=0
+        while [ "$index" != "$PROCESS_NUM" ]
+        do
+            listen_port=$(($PORT+$index))
+            echo "\tListen on $listen_port ..."
+            $PYTHON $BIDONG_APP --port=$listen_port > /dev/null 2>&1 &
+            index=$(($index+1))
+        done
+        echo "$DESC."
+        ;;
+    stop)
+        echo "Stop $DESC service: "
+        files=$(ls $PID_PATH | grep ^p_.*)
+        echo $files
+        for file in $files
+        do
+            echo "\tStop $file"
+            set +e
+            kill -s HUP $(cat $PID_PATH/$file)
+            set -e
+            echo "$file."
+        done
+        echo "$DESC."
+        ;;
+    *)
+        echo "Usage: $DESC {start|stop}"
+        exit 1
+        ;;
+esac
+exit 0
+

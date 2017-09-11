@@ -1,0 +1,72 @@
+#!/bin/bash
+#
+###
+# Portal service. {start, stop}
+#
+#
+# 2015/03/31    hayate
+set -e
+
+PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
+# PYTHON=/usr/local/python-2.7.9/bin/python
+PYTHON=/usr/bin/python2.7
+
+LOG_PATH=/siov/opt/bidong/logs/wnl
+PID_PATH=/siov/opt/bidong/run/wnl
+
+BIDONG_PATH=/web/radius
+SPORTAL_APP=$BIDONG_PATH/wnl.py
+PORT=8890
+# PORT=8080
+PROCESS_NUM=1
+
+DESC="special portal"
+
+test -x $PYTHON || exit 1
+
+# create necessary logs directory
+
+if [ ! -d $LOG_PATH ]; then
+    mkdir $LOG_PATH
+fi
+if [ ! -d $PID_PATH ]; then
+    mkdir $PID_PATH
+fi
+
+
+case "$1" in
+    start)
+        echo "Starting $DESC service: "
+        cd $BIDONG_PATH
+        index=0
+        while [ "$index" != "$PROCESS_NUM" ]
+        do
+            listen_port=$(($PORT+$index))
+            echo "\tListen on $listen_port ..."
+            $PYTHON $SPORTAL_APP --port=$listen_port -log_file_prefix=$LOG_PATH/$listen_port.log > /dev/null 2>&1 &
+            index=$(($index+1))
+        done
+        echo "$DESC."
+        ;;
+    stop)
+        echo "Stop $DESC service: "
+        # kill -s HUP $(cat /var/run/wnl.pid)
+        files=$(ls $PID_PATH | grep ^p_.*)
+        echo $files
+        for file in $files
+        do
+            echo "\tStop $file"
+            set +e
+            kill -s HUP $(cat $PID_PATH/$file) && rm $PID_PATH/$file
+            set -e
+            echo "$file."
+        done
+        echo "$DESC."
+        ;;
+    *)
+        echo "Usage: $DESC {start|stop}"
+        exit 1
+        ;;
+esac
+exit 0
+

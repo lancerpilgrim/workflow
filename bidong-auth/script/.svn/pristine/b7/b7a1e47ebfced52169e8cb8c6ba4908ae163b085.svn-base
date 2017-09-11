@@ -1,0 +1,87 @@
+#!/bin/bash
+#
+###
+# Portal service. {start, stop}
+#
+#
+# 2015/03/31    hayate
+set -e
+
+PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
+# PYTHON=/usr/local/python-2.7.9/bin/python
+PYTHON=/usr/bin/python2.7
+LOG=/var/log/radiusd
+RADIUS_PATH=/web/radius
+PORTAL_APP=$RADIUS_PATH/portal_server.py
+PID_PATH=/var/run/portal
+PORTAL_PID=/var/run/portal.pid
+
+PORT=8880
+PROCESS_NUM=2
+TOTAL=$(($PROCESS_NUM+2))
+
+DESC=portal
+
+test -x $PYTHON || exit 1
+
+# create necessary logs directory
+
+if [ ! -d $LOG ]; then
+    mkdir $LOG
+fi
+
+if [ ! -d $PID_PATH ]; then
+    mkdir $PID_PATH
+fi
+
+
+echo "$0, $1, $2"
+
+case "$1" in
+    start)
+        echo "Starting $DESC service: "
+        cd $RADIUS_PATH
+        index=0
+        while [ "$index" != "$PROCESS_NUM" ]
+        do
+            listen_port=$(($PORT+$index))
+            echo "\tListen on $listen_port ..."
+            $PYTHON $PORTAL_APP --port=$listen_port -log_file_prefix=$LOG/portal_$listen_port.log \
+                --index=$index --total=$TOTAL > /dev/null 2>&1 &
+            index=$(($index+1))
+        done
+        # listen udp portal, deport=$(($PORT+$PROCESS_NUM)) al with notify packages from ac
+        listen_port=$(($PORT+$PROCESS_NUM)) 
+        index=$PROCESS_NUM
+        echo "\tListen on $listen_port ..."
+        $PYTHON $PORTAL_APP --port=$listen_port -log_file_prefix=$LOG/portal_$listen_port.log \
+            --udp_listen=1 --index=$index --total=$TOTAL > /dev/null 2>&1 &
+
+        # listen_port=$(($PORT+$PROCESS_NUM+1)) 
+        # index=$(($PROCESS_NUM+1))
+        # echo "\tListen on $listen_port ..."
+        # $PYTHON $PORTAL_APP --port=$listen_port -log_file_prefix=$LOG/portal_$listen_port.log \
+        #     --udp_listen=1 --portal_listen=50101 --index=$index --total=$TOTAL > /dev/null 2>&1 &
+        echo "$DESC."
+        ;;
+    stop)
+        echo "Stop $DESC service: "
+        files=$(ls $PID_PATH | grep ^p_.*)
+        echo $files
+        for file in $files
+        do
+            echo "\tStop $file"
+            set +e
+            kill -s HUP $(cat $PID_PATH/$file) && rm -f $PID_PATH/$file
+            set -e
+            echo "$file."
+        done
+        echo "$DESC."
+        ;;
+    *)
+        echo "Usage: $DESC {start|stop}"
+        exit 1
+        ;;
+esac
+exit 0
+

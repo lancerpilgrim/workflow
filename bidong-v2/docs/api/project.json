@@ -1,0 +1,3236 @@
+{
+    "basePath": "/v1.0",
+    "swagger": "2.0",
+    "paths": {
+        "/projects/{project_id}/tags": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "description": "创建标签",
+                "responses": {
+                    "200": {
+                        "schema": {
+                            "$ref": "#definitions/ApiSuccess"
+                        },
+                        "description": "OK"
+                    },
+                    "400": {
+                        "schema": {
+                            "$ref": "#definitions/Api400Error"
+                        },
+                        "description": "BAD REQUEST"
+                    }
+                },
+                "summary": "创建新标签",
+                "tags": [
+                    "tag"
+                ],
+                "parameters": [
+                    {
+                        "required": true,
+                        "type": "integer",
+                        "description": "项目ID",
+                        "name": "project_id",
+                        "in": "path"
+                    },
+                    {
+                        "schema": {
+                            "$ref": "#definitions/Tag"
+                        },
+                        "description": "标签名",
+                        "name": "name",
+                        "in": "body"
+                    }
+                ]
+            },
+            "get": {
+                "summary": "获取标签列表",
+                "tags": [
+                    "tag"
+                ],
+                "description": "获取标签列表",
+                "parameters": [
+                    {
+                        "required": true,
+                        "type": "string",
+                        "description": "标签类型, 选项 [account, ap]",
+                        "name": "type",
+                        "in": "query"
+                    },
+                    {
+                        "required": true,
+                        "type": "integer",
+                        "description": "项目ID",
+                        "name": "project_id",
+                        "in": "path"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "schema": {
+                            "$ref": "#definitions/TagList"
+                        },
+                        "description": "标签列表"
+                    },
+                    "500": {
+                        "schema": {
+                            "$ref": "#definitions/ApiError"
+                        },
+                        "description": "出错信息"
+                    }
+                }
+            }
+        },
+        "/projects/{project_id}/tags/{tag_id}": {
+            "delete": {
+                "summary": "删除标签",
+                "tags": [
+                    "tag"
+                ],
+                "description": "删除标签",
+                "parameters": [
+                    {
+                        "required": true,
+                        "type": "integer",
+                        "description": "项目ID",
+                        "name": "project_id",
+                        "in": "path"
+                    },
+                    {
+                        "required": true,
+                        "type": "integer",
+                        "description": "标签id",
+                        "name": "tag_id",
+                        "in": "path"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "schema": {
+                            "$ref": "#definitions/ApiSuccess"
+                        },
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/projects/{project_id}/networks": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "description": "新增WiFi网络配置",
+                "responses": {
+                    "200": {
+                        "schema": {
+                            "$ref": "#definitions/ApiSuccess"
+                        },
+                        "description": "OK"
+                    },
+                    "400": {
+                        "schema": {
+                            "$ref": "#definitions/Api400Error"
+                        },
+                        "description": "BAD REQUEST"
+                    }
+                },
+                "summary": "新增WiFi网络配置",
+                "tags": [
+                    "project"
+                ],
+                "parameters": [
+                    {
+                        "required": true,
+                        "type": "integer",
+                        "description": "当前项目id",
+                        "name": "project_id",
+                        "in": "path"
+                    },
+                    {
+                        "required": true,
+                        "schema": {
+                            "$ref": "#definitions/Network"
+                        },
+                        "description": "WiFi网络配置信息",
+                        "name": "package",
+                        "in": "body"
+                    }
+                ]
+            },
+            "get": {
+                "summary": "获取项目WiFi网络配置列表",
+                "tags": [
+                    "project"
+                ],
+                "description": "获取项目WiFi网络配置列表",
+                "parameters": [
+                    {
+                        "required": true,
+                        "type": "integer",
+                        "description": "当前项目id",
+                        "name": "project_id",
+                        "in": "path"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "当前页",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "每页条数",
+                        "name": "page_size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "根据ssid或者ID搜索",
+                        "name": "keyword",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "schema": {
+                            "$ref": "#definitions/NetworkList"
+                        },
+                        "description": "当前项目的套餐列表"
+                    }
+                }
+            }
+        },
+        "/projects/{project_id}/networks/{network_id}": {
+            "get": {
+                "summary": "获取网络配置详情",
+                "tags": [
+                    "project"
+                ],
+                "description": "获取套餐详情",
+                "parameters": [
+                    {
+                        "required": true,
+                        "type": "integer",
+                        "description": "当前项目id",
+                        "name": "project_id",
+                        "in": "path"
+                    },
+                    {
+                        "required": true,
+                        "type": "integer",
+                        "description": "网络配置ID",
+                        "name": "network_id",
+                        "in": "path"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "schema": {
+                            "$ref": "#definitions/Network"
+                        },
+                        "description": "网络配置ID"
+                    },
+                    "404": {
+                        "schema": {
+                            "$ref": "#definitions/ApiError"
+                        },
+                        "description": "Not Found"
+                    }
+                }
+            },
+            "delete": {
+                "summary": "删除网络配置",
+                "tags": [
+                    "project"
+                ],
+                "description": "删除网络配置",
+                "parameters": [
+                    {
+                        "required": true,
+                        "type": "integer",
+                        "description": "当前项目id",
+                        "name": "project_id",
+                        "in": "path"
+                    },
+                    {
+                        "required": true,
+                        "type": "integer",
+                        "description": "网络配置ID",
+                        "name": "network_id",
+                        "in": "path"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "schema": {
+                            "$ref": "#definitions/ApiSuccess"
+                        },
+                        "description": "OK"
+                    }
+                }
+            },
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "description": "更新网络配置",
+                "responses": {
+                    "200": {
+                        "schema": {
+                            "$ref": "#definitions/ApiSuccess"
+                        },
+                        "description": "OK"
+                    },
+                    "400": {
+                        "schema": {
+                            "$ref": "#definitions/Api400Error"
+                        },
+                        "description": "BAD REQUEST"
+                    }
+                },
+                "summary": "更新网络配置",
+                "tags": [
+                    "project"
+                ],
+                "parameters": [
+                    {
+                        "required": true,
+                        "type": "integer",
+                        "description": "当前项目id",
+                        "name": "project_id",
+                        "in": "path"
+                    },
+                    {
+                        "required": true,
+                        "type": "integer",
+                        "description": "网络配置ID",
+                        "name": "network_id",
+                        "in": "path"
+                    },
+                    {
+                        "required": true,
+                        "schema": {
+                            "$ref": "#definitions/Network"
+                        },
+                        "description": "网络配置",
+                        "name": "package",
+                        "in": "body"
+                    }
+                ]
+            }
+        },
+        "/projects/{project_id}/aps": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "description": "新增AP",
+                "responses": {
+                    "200": {
+                        "schema": {
+                            "$ref": "#definitions/ApiSuccess"
+                        },
+                        "description": "OK"
+                    },
+                    "400": {
+                        "schema": {
+                            "$ref": "#definitions/Api400Error"
+                        },
+                        "description": "BAD REQUEST"
+                    }
+                },
+                "summary": "新增AP",
+                "tags": [
+                    "project"
+                ],
+                "parameters": [
+                    {
+                        "required": true,
+                        "type": "integer",
+                        "description": "当前项目id",
+                        "name": "project_id",
+                        "in": "path"
+                    },
+                    {
+                        "required": true,
+                        "schema": {
+                            "$ref": "#definitions/AP"
+                        },
+                        "description": "AP信息",
+                        "name": "ap",
+                        "in": "body"
+                    }
+                ]
+            },
+            "get": {
+                "summary": "获取项目AP列表",
+                "tags": [
+                    "project"
+                ],
+                "description": "获取项目AP列表",
+                "parameters": [
+                    {
+                        "required": true,
+                        "type": "integer",
+                        "description": "当前项目id",
+                        "name": "project_id",
+                        "in": "path"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "当前页",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "每页大小",
+                        "name": "page_size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "是否在线, 0 - 离线, 1 - 在线",
+                        "name": "online",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "品牌",
+                        "name": "vendor",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "标签id",
+                        "name": "tag",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "名字、位置或者mac搜索",
+                        "name": "keyword",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "schema": {
+                            "$ref": "#definitions/APList"
+                        },
+                        "description": "项目用户列表"
+                    },
+                    "400": {
+                        "schema": {
+                            "$ref": "#definitions/ApiError"
+                        },
+                        "description": "Server Error"
+                    }
+                }
+            }
+        },
+        "/projects/{project_id}/aps/overview": {
+            "get": {
+                "summary": "获取项目AP数据",
+                "tags": [
+                    "project"
+                ],
+                "description": "获取项目AP数据",
+                "parameters": [
+                    {
+                        "required": true,
+                        "type": "integer",
+                        "description": "当前项目id",
+                        "name": "project_id",
+                        "in": "path"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "online": {
+                                    "type": "integer",
+                                    "description": "在线AP数"
+                                },
+                                "total": {
+                                    "type": "integer",
+                                    "description": "总AP数"
+                                },
+                                "alert": {
+                                    "type": "integer",
+                                    "description": "AP警报数"
+                                },
+                                "rate": {
+                                    "type": "number",
+                                    "description": "授权使用率"
+                                }
+                            }
+                        },
+                        "description": "项目AP数据统计"
+                    },
+                    "404": {
+                        "schema": {
+                            "$ref": "#definitions/Api400Error"
+                        },
+                        "description": "Not Found"
+                    }
+                }
+            }
+        },
+        "/projects/{project_id}/aps/{ap_id}": {
+            "get": {
+                "summary": "AP详情",
+                "tags": [
+                    "project"
+                ],
+                "description": "获取项目AP详情",
+                "parameters": [
+                    {
+                        "required": true,
+                        "type": "integer",
+                        "description": "当前项目id",
+                        "name": "project_id",
+                        "in": "path"
+                    },
+                    {
+                        "required": true,
+                        "type": "integer",
+                        "description": "AP ID",
+                        "name": "ap_id",
+                        "in": "path"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "schema": {
+                            "$ref": "#definitions/AP"
+                        },
+                        "description": "项目AP详情"
+                    },
+                    "404": {
+                        "schema": {
+                            "$ref": "#definitions/ApiError"
+                        },
+                        "description": "Not Found"
+                    }
+                }
+            },
+            "delete": {
+                "summary": "删除AP",
+                "tags": [
+                    "project"
+                ],
+                "description": "删除AP",
+                "parameters": [
+                    {
+                        "required": true,
+                        "type": "integer",
+                        "description": "当前项目id",
+                        "name": "project_id",
+                        "in": "path"
+                    },
+                    {
+                        "required": true,
+                        "type": "integer",
+                        "description": "AP ID",
+                        "name": "ap_id",
+                        "in": "path"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "schema": {
+                            "$ref": "#definitions/ApiSuccess"
+                        },
+                        "description": "OK"
+                    }
+                }
+            },
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "description": "更新AP",
+                "responses": {
+                    "200": {
+                        "schema": {
+                            "$ref": "#definitions/ApiSuccess"
+                        },
+                        "description": "OK"
+                    },
+                    "400": {
+                        "schema": {
+                            "$ref": "#definitions/Api400Error"
+                        },
+                        "description": "BAD REQUEST"
+                    }
+                },
+                "summary": "更新AP",
+                "tags": [
+                    "project"
+                ],
+                "parameters": [
+                    {
+                        "required": true,
+                        "type": "integer",
+                        "description": "当前项目id",
+                        "name": "project_id",
+                        "in": "path"
+                    },
+                    {
+                        "required": true,
+                        "type": "integer",
+                        "description": "AP ID",
+                        "name": "ap_id",
+                        "in": "path"
+                    },
+                    {
+                        "required": true,
+                        "schema": {
+                            "$ref": "#definitions/AP"
+                        },
+                        "description": "AP信息",
+                        "name": "ap",
+                        "in": "body"
+                    }
+                ]
+            }
+        },
+        "/projects/{project_id}/users/overview": {
+            "get": {
+                "summary": "获取项目用户数据",
+                "tags": [
+                    "user"
+                ],
+                "description": "获取项目用户数据",
+                "parameters": [
+                    {
+                        "required": true,
+                        "type": "integer",
+                        "description": "当前项目id",
+                        "name": "project_id",
+                        "in": "path"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "online_user": {
+                                    "type": "integer"
+                                },
+                                "total_user": {
+                                    "type": "integer"
+                                }
+                            }
+                        },
+                        "description": "项目用户统计"
+                    },
+                    "404": {
+                        "schema": {
+                            "$ref": "#definitions/Api400Error"
+                        },
+                        "description": "Not Found"
+                    }
+                }
+            }
+        },
+        "/projects/{project_id}/users/profiles": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "description": "创建项目用户",
+                "responses": {
+                    "200": {
+                        "schema": {
+                            "$ref": "#definitions/ApiSuccess"
+                        },
+                        "description": "OK"
+                    },
+                    "400": {
+                        "schema": {
+                            "$ref": "#definitions/Api400Error"
+                        },
+                        "description": "BAD REQUEST"
+                    }
+                },
+                "summary": "新增用户",
+                "tags": [
+                    "user"
+                ],
+                "parameters": [
+                    {
+                        "required": true,
+                        "type": "integer",
+                        "description": "当前项目id",
+                        "name": "project_id",
+                        "in": "path"
+                    },
+                    {
+                        "required": true,
+                        "schema": {
+                            "$ref": "#definitions/User"
+                        },
+                        "description": "用户信息",
+                        "name": "user",
+                        "in": "body"
+                    }
+                ]
+            },
+            "get": {
+                "summary": "获取项目用户列表",
+                "tags": [
+                    "user"
+                ],
+                "description": "获取项目用户列表",
+                "parameters": [
+                    {
+                        "required": true,
+                        "type": "integer",
+                        "description": "当前项目id",
+                        "name": "project_id",
+                        "in": "path"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "当前页",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "required": false,
+                        "type": "integer",
+                        "description": "是否在线, 0 - 离线, 1 - 在线",
+                        "name": "online",
+                        "in": "query"
+                    },
+                    {
+                        "required": false,
+                        "type": "integer",
+                        "description": "标签id",
+                        "name": "tag",
+                        "in": "query"
+                    },
+                    {
+                        "required": false,
+                        "type": "string",
+                        "description": "姓名或者手机号搜索",
+                        "name": "keyword",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "schema": {
+                            "$ref": "#definitions/UserList"
+                        },
+                        "description": "项目用户列表"
+                    },
+                    "400": {
+                        "schema": {
+                            "$ref": "#definitions/Api400Error"
+                        },
+                        "description": "Bad Request"
+                    },
+                    "500": {
+                        "schema": {
+                            "$ref": "#definitions/ApiError"
+                        },
+                        "description": "Server Error"
+                    }
+                }
+            },
+            "delete": {
+                "summary": "批量删除用户",
+                "tags": [
+                    "user"
+                ],
+                "description": "批量删除项目用户",
+                "parameters": [
+                    {
+                        "required": true,
+                        "type": "integer",
+                        "description": "当前项目id",
+                        "name": "project_id",
+                        "in": "path"
+                    },
+                    {
+                        "required": true,
+                        "type": "string",
+                        "description": "要删除的用户ID列表，ID直接用逗号隔开, choice=1,2,3,4",
+                        "name": "choice",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "schema": {
+                            "$ref": "#definitions/ApiSuccess"
+                        },
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/projects/{project_id}/users/profiles/{profile_id}": {
+            "get": {
+                "summary": "用户详情",
+                "tags": [
+                    "user"
+                ],
+                "description": "获取项目用户详情",
+                "parameters": [
+                    {
+                        "required": true,
+                        "type": "integer",
+                        "description": "当前项目id",
+                        "name": "project_id",
+                        "in": "path"
+                    },
+                    {
+                        "required": true,
+                        "type": "integer",
+                        "description": "用户ID",
+                        "name": "profile_id",
+                        "in": "path"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "schema": {
+                            "$ref": "#definitions/UserDetail"
+                        },
+                        "description": "项目用户详情"
+                    },
+                    "404": {
+                        "schema": {
+                            "$ref": "#definitions/ApiError"
+                        },
+                        "description": "Not Found"
+                    }
+                }
+            },
+            "delete": {
+                "summary": "删除用户",
+                "tags": [
+                    "user"
+                ],
+                "description": "删除项目用户",
+                "parameters": [
+                    {
+                        "required": true,
+                        "type": "integer",
+                        "description": "当前项目id",
+                        "name": "project_id",
+                        "in": "path"
+                    },
+                    {
+                        "required": true,
+                        "type": "integer",
+                        "description": "用户ID",
+                        "name": "profile_id",
+                        "in": "path"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "schema": {
+                            "$ref": "#definitions/ApiSuccess"
+                        },
+                        "description": "OK"
+                    }
+                }
+            },
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "description": "更新项目用户",
+                "responses": {
+                    "200": {
+                        "schema": {
+                            "$ref": "#definitions/ApiSuccess"
+                        },
+                        "description": "OK"
+                    },
+                    "400": {
+                        "schema": {
+                            "$ref": "#definitions/Api400Error"
+                        },
+                        "description": "BAD REQUEST"
+                    }
+                },
+                "summary": "编辑用户",
+                "tags": [
+                    "user"
+                ],
+                "parameters": [
+                    {
+                        "required": true,
+                        "type": "integer",
+                        "description": "当前项目id",
+                        "name": "project_id",
+                        "in": "path"
+                    },
+                    {
+                        "required": true,
+                        "type": "integer",
+                        "description": "用户ID",
+                        "name": "profile_id",
+                        "in": "path"
+                    },
+                    {
+                        "required": true,
+                        "schema": {
+                            "$ref": "#definitions/User"
+                        },
+                        "description": "项目用户信息",
+                        "name": "user",
+                        "in": "body"
+                    }
+                ]
+            }
+        },
+        "/projects/{project_id}/users/custom-attr": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "description": "设置用户自定义属性",
+                "responses": {
+                    "200": {
+                        "schema": {
+                            "$ref": "#definitions/ApiSuccess"
+                        },
+                        "description": "OK"
+                    },
+                    "400": {
+                        "schema": {
+                            "$ref": "#definitions/Api400Error"
+                        },
+                        "description": "BAD REQUEST"
+                    }
+                },
+                "summary": "设置用户自定义属性",
+                "tags": [
+                    "user"
+                ],
+                "parameters": [
+                    {
+                        "required": true,
+                        "type": "integer",
+                        "description": "当前项目id",
+                        "name": "project_id",
+                        "in": "path"
+                    },
+                    {
+                        "required": true,
+                        "schema": {
+                            "$ref": "#definitions/DyncolIdList"
+                        },
+                        "description": "自定义属性id 列表",
+                        "name": "letter",
+                        "in": "body"
+                    }
+                ]
+            },
+            "get": {
+                "summary": "获取项目用户自定义属性",
+                "tags": [
+                    "user"
+                ],
+                "description": "获取项目用户自定义属性",
+                "parameters": [
+                    {
+                        "required": true,
+                        "type": "integer",
+                        "description": "当前项目id",
+                        "name": "project_id",
+                        "in": "path"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "schema": {
+                            "$ref": "#definitions/DyncolList"
+                        },
+                        "description": "用户自定义属性"
+                    },
+                    "500": {
+                        "schema": {
+                            "$ref": "#definitions/ApiError"
+                        },
+                        "description": "出错信息"
+                    }
+                }
+            }
+        },
+        "/projects/{project_id}/users/visitors": {
+            "get": {
+                "summary": "在线访客",
+                "tags": [
+                    "user"
+                ],
+                "description": "获取项目在线访客",
+                "parameters": [
+                    {
+                        "required": true,
+                        "type": "integer",
+                        "description": "当前项目id",
+                        "name": "project_id",
+                        "in": "path"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "当前页",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "required": false,
+                        "type": "string",
+                        "description": "姓名或者手机号搜索",
+                        "name": "keyword",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "schema": {
+                            "$ref": "#definitions/VisitorUserList"
+                        },
+                        "description": "项目用户列表"
+                    },
+                    "400": {
+                        "schema": {
+                            "$ref": "#definitions/Api400Error"
+                        },
+                        "description": "Bad Request"
+                    }
+                }
+            },
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "description": "更新项目用户",
+                "responses": {
+                    "200": {
+                        "schema": {
+                            "$ref": "#definitions/ApiSuccess"
+                        },
+                        "description": "OK"
+                    },
+                    "400": {
+                        "schema": {
+                            "$ref": "#definitions/Api400Error"
+                        },
+                        "description": "BAD REQUEST"
+                    }
+                },
+                "summary": "下线在线访客",
+                "tags": [
+                    "user"
+                ],
+                "parameters": [
+                    {
+                        "required": true,
+                        "type": "integer",
+                        "description": "当前项目id",
+                        "name": "project_id",
+                        "in": "path"
+                    },
+                    {
+                        "required": true,
+                        "type": "integer",
+                        "description": "在线访客id",
+                        "name": "userid",
+                        "in": "query"
+                    },
+                    {
+                        "required": true,
+                        "type": "string",
+                        "description": "将游客下线, action=offline",
+                        "name": "action",
+                        "in": "query"
+                    }
+                ]
+            }
+        },
+        "/projects/{project_id}/packages": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "description": "新增项目套餐",
+                "responses": {
+                    "200": {
+                        "schema": {
+                            "$ref": "#definitions/ApiSuccess"
+                        },
+                        "description": "OK"
+                    },
+                    "400": {
+                        "schema": {
+                            "$ref": "#definitions/Api400Error"
+                        },
+                        "description": "BAD REQUEST"
+                    }
+                },
+                "summary": "新增项目套餐",
+                "tags": [
+                    "billing"
+                ],
+                "parameters": [
+                    {
+                        "required": true,
+                        "type": "integer",
+                        "description": "当前项目id",
+                        "name": "project_id",
+                        "in": "path"
+                    },
+                    {
+                        "required": true,
+                        "schema": {
+                            "$ref": "#definitions/Package"
+                        },
+                        "description": "套餐信息",
+                        "name": "package",
+                        "in": "body"
+                    }
+                ]
+            },
+            "get": {
+                "summary": "获取套餐列表",
+                "tags": [
+                    "billing"
+                ],
+                "description": "获取套餐列表",
+                "parameters": [
+                    {
+                        "required": true,
+                        "type": "integer",
+                        "description": "当前项目id",
+                        "name": "project_id",
+                        "in": "path"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "当前页",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "每页条数",
+                        "name": "page_size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "套餐名搜索",
+                        "name": "keyword",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "schema": {
+                            "$ref": "#definitions/PackageList"
+                        },
+                        "description": "当前项目的套餐列表"
+                    },
+                    "500": {
+                        "schema": {
+                            "$ref": "#definitions/ApiError"
+                        },
+                        "description": "出错信息"
+                    }
+                }
+            }
+        },
+        "/projects/{project_id}/packages/{package_id}": {
+            "get": {
+                "summary": "获取套餐详情",
+                "tags": [
+                    "billing"
+                ],
+                "description": "获取套餐详情",
+                "parameters": [
+                    {
+                        "required": true,
+                        "type": "integer",
+                        "description": "当前项目id",
+                        "name": "project_id",
+                        "in": "path"
+                    },
+                    {
+                        "required": true,
+                        "type": "integer",
+                        "description": "套餐ID",
+                        "name": "package_id",
+                        "in": "path"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "schema": {
+                            "$ref": "#definitions/Package"
+                        },
+                        "description": "套餐详情"
+                    },
+                    "404": {
+                        "schema": {
+                            "$ref": "#definitions/ApiError"
+                        },
+                        "description": "Not Found"
+                    }
+                }
+            },
+            "delete": {
+                "summary": "删除套餐",
+                "tags": [
+                    "billing"
+                ],
+                "description": "删除套餐",
+                "parameters": [
+                    {
+                        "required": true,
+                        "type": "integer",
+                        "description": "当前项目id",
+                        "name": "project_id",
+                        "in": "path"
+                    },
+                    {
+                        "required": true,
+                        "type": "integer",
+                        "description": "套餐ID",
+                        "name": "package_id",
+                        "in": "path"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "schema": {
+                            "$ref": "#definitions/ApiSuccess"
+                        },
+                        "description": "OK"
+                    }
+                }
+            },
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "description": "更新套餐有效期和投放标签",
+                "responses": {
+                    "200": {
+                        "schema": {
+                            "$ref": "#definitions/ApiSuccess"
+                        },
+                        "description": "OK"
+                    },
+                    "400": {
+                        "schema": {
+                            "$ref": "#definitions/Api400Error"
+                        },
+                        "description": "BAD REQUEST"
+                    }
+                },
+                "summary": "编辑套餐",
+                "tags": [
+                    "billing"
+                ],
+                "parameters": [
+                    {
+                        "required": true,
+                        "type": "integer",
+                        "description": "当前项目id",
+                        "name": "project_id",
+                        "in": "path"
+                    },
+                    {
+                        "required": true,
+                        "type": "integer",
+                        "description": "用户ID",
+                        "name": "package_id",
+                        "in": "path"
+                    },
+                    {
+                        "required": true,
+                        "schema": {
+                            "$ref": "#definitions/PackageUpdate"
+                        },
+                        "description": "套餐投放标签ID列表或到期时间，可只填一项",
+                        "name": "package",
+                        "in": "body"
+                    }
+                ]
+            }
+        },
+        "/projects/{project_id}/orders": {
+            "get": {
+                "summary": "获取收款记录",
+                "tags": [
+                    "billing"
+                ],
+                "description": "获取收款记录",
+                "parameters": [
+                    {
+                        "required": true,
+                        "type": "integer",
+                        "description": "当前项目id",
+                        "name": "project_id",
+                        "in": "path"
+                    },
+                    {
+                        "required": true,
+                        "type": "string",
+                        "description": "开始日期，格式示例 2017-08-01",
+                        "name": "begin",
+                        "in": "query"
+                    },
+                    {
+                        "required": true,
+                        "type": "string",
+                        "description": "截止日期，格式示例 2017-08-30",
+                        "name": "end",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "当前页",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "每页条数",
+                        "name": "page_size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "套餐名搜索",
+                        "name": "keyword",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "schema": {
+                            "$ref": "#definitions/OrderList"
+                        },
+                        "description": "收款记录"
+                    },
+                    "400": {
+                        "schema": {
+                            "$ref": "#definitions/Api400Error"
+                        },
+                        "description": "出错信息"
+                    }
+                }
+            }
+        },
+        "/projects/{project_id}/orders/overview": {
+            "get": {
+                "summary": "获取收款统计",
+                "tags": [
+                    "billing"
+                ],
+                "description": "获取收款统计",
+                "parameters": [
+                    {
+                        "required": true,
+                        "type": "integer",
+                        "description": "当前项目id",
+                        "name": "project_id",
+                        "in": "path"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "total_amount": {
+                                    "type": "number"
+                                },
+                                "today_amount": {
+                                    "type": "number"
+                                }
+                            }
+                        },
+                        "description": "项目收款统计"
+                    },
+                    "404": {
+                        "schema": {
+                            "$ref": "#definitions/ApiError"
+                        },
+                        "description": "Not Found"
+                    }
+                }
+            }
+        },
+        "/projects/{project_id}/orders/chart": {
+            "get": {
+                "summary": "获取收款日统计数据",
+                "tags": [
+                    "billing"
+                ],
+                "description": "获取收款日统计数据",
+                "parameters": [
+                    {
+                        "required": true,
+                        "type": "integer",
+                        "description": "当前项目id",
+                        "name": "project_id",
+                        "in": "path"
+                    },
+                    {
+                        "required": true,
+                        "type": "string",
+                        "description": "开始日期，格式示例 2017-08-01",
+                        "name": "begin",
+                        "in": "query"
+                    },
+                    {
+                        "required": true,
+                        "type": "string",
+                        "description": "截止日期，格式示例 2017-08-30",
+                        "name": "end",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "schema": {
+                            "$ref": "#definitions/OrderChart"
+                        },
+                        "description": "收款日统计"
+                    },
+                    "404": {
+                        "schema": {
+                            "$ref": "#definitions/Api400Error"
+                        },
+                        "description": "Not Found"
+                    }
+                }
+            }
+        },
+        "/projects/{project_id}/portals": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "description": "新增portal页配置",
+                "responses": {
+                    "200": {
+                        "schema": {
+                            "$ref": "#definitions/ApiSuccess"
+                        },
+                        "description": "OK"
+                    },
+                    "400": {
+                        "schema": {
+                            "$ref": "#definitions/Api400Error"
+                        },
+                        "description": "BAD REQUEST"
+                    }
+                },
+                "summary": "新增portal页配置",
+                "tags": [
+                    "operations"
+                ],
+                "parameters": [
+                    {
+                        "required": true,
+                        "type": "integer",
+                        "description": "当前项目id",
+                        "name": "project_id",
+                        "in": "path"
+                    },
+                    {
+                        "required": true,
+                        "schema": {
+                            "$ref": "#definitions/Portal"
+                        },
+                        "description": "portal页配置",
+                        "name": "package",
+                        "in": "body"
+                    }
+                ]
+            },
+            "get": {
+                "summary": "获取portal页配置列表",
+                "tags": [
+                    "operations"
+                ],
+                "description": "获取portal配置列表",
+                "parameters": [
+                    {
+                        "required": true,
+                        "type": "integer",
+                        "description": "当前项目id",
+                        "name": "project_id",
+                        "in": "path"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "schema": {
+                            "$ref": "#definitions/PortalList"
+                        },
+                        "description": "当前项目的套餐列表"
+                    }
+                }
+            }
+        },
+        "/projects/{project_id}/portals/{portal_id}": {
+            "get": {
+                "summary": "获取portal页配置",
+                "tags": [
+                    "operations"
+                ],
+                "description": "获取portal页配置",
+                "parameters": [
+                    {
+                        "required": true,
+                        "type": "integer",
+                        "description": "当前项目id",
+                        "name": "project_id",
+                        "in": "path"
+                    },
+                    {
+                        "required": true,
+                        "type": "integer",
+                        "description": "portal配置id",
+                        "name": "portal_id",
+                        "in": "path"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "schema": {
+                            "$ref": "#definitions/Portal"
+                        },
+                        "description": "portal配置详情"
+                    }
+                }
+            },
+            "delete": {
+                "summary": "删除portal页配置",
+                "tags": [
+                    "operations"
+                ],
+                "description": "删除portal页配置",
+                "parameters": [
+                    {
+                        "required": true,
+                        "type": "integer",
+                        "description": "当前项目id",
+                        "name": "project_id",
+                        "in": "path"
+                    },
+                    {
+                        "required": true,
+                        "type": "integer",
+                        "description": "portal配置表",
+                        "name": "portal_id",
+                        "in": "path"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "schema": {
+                            "$ref": "#definitions/ApiSuccess"
+                        },
+                        "description": "OK"
+                    }
+                }
+            },
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "description": "更新portal页配置",
+                "responses": {
+                    "200": {
+                        "schema": {
+                            "$ref": "#definitions/ApiSuccess"
+                        },
+                        "description": "OK"
+                    },
+                    "400": {
+                        "schema": {
+                            "$ref": "#definitions/Api400Error"
+                        },
+                        "description": "BAD REQUEST"
+                    }
+                },
+                "summary": "更新portal页配置",
+                "tags": [
+                    "operations"
+                ],
+                "parameters": [
+                    {
+                        "required": true,
+                        "type": "integer",
+                        "description": "当前项目id",
+                        "name": "project_id",
+                        "in": "path"
+                    },
+                    {
+                        "required": true,
+                        "type": "integer",
+                        "description": "portal配置ID",
+                        "name": "portal_id",
+                        "in": "path"
+                    },
+                    {
+                        "required": true,
+                        "schema": {
+                            "$ref": "#definitions/Portal"
+                        },
+                        "description": "portal页配置",
+                        "name": "package",
+                        "in": "body"
+                    }
+                ]
+            }
+        },
+        "/projects/{project_id}/wechat-accounts": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "description": "新增公众号",
+                "responses": {
+                    "200": {
+                        "schema": {
+                            "$ref": "#definitions/ApiSuccess"
+                        },
+                        "description": "OK"
+                    },
+                    "400": {
+                        "schema": {
+                            "$ref": "#definitions/Api400Error"
+                        },
+                        "description": "BAD REQUEST"
+                    }
+                },
+                "summary": "新增公众号",
+                "tags": [
+                    "operations"
+                ],
+                "parameters": [
+                    {
+                        "required": true,
+                        "type": "integer",
+                        "description": "当前项目id",
+                        "name": "project_id",
+                        "in": "path"
+                    },
+                    {
+                        "required": true,
+                        "schema": {
+                            "$ref": "#definitions/WechatAccount"
+                        },
+                        "description": "套餐信息",
+                        "name": "wechat_account",
+                        "in": "body"
+                    }
+                ]
+            },
+            "get": {
+                "summary": "获取公众号列表",
+                "tags": [
+                    "operations"
+                ],
+                "description": "获取公众号列表",
+                "parameters": [
+                    {
+                        "required": true,
+                        "type": "integer",
+                        "description": "当前项目id",
+                        "name": "project_id",
+                        "in": "path"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "当前页",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "每页条数",
+                        "name": "page_size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "公众号名称等搜索",
+                        "name": "keyword",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "schema": {
+                            "$ref": "#definitions/WechatAccountList"
+                        },
+                        "description": "公众号列表"
+                    },
+                    "400": {
+                        "schema": {
+                            "$ref": "#definitions/ApiError"
+                        },
+                        "description": "出错信息"
+                    }
+                }
+            }
+        },
+        "/projects/{project_id}/wechat-accounts/fields": {
+            "get": {
+                "summary": "获取公众号选定字段值",
+                "tags": [
+                    "operations"
+                ],
+                "description": "获取公众号选定字段值, 不分页",
+                "parameters": [
+                    {
+                        "required": true,
+                        "type": "integer",
+                        "description": "当前项目id",
+                        "name": "project_id",
+                        "in": "path"
+                    },
+                    {
+                        "required": true,
+                        "type": "string",
+                        "description": "用逗号拼接的选定字段, 如id,name",
+                        "name": "select",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "schema": {
+                            "$ref": "#definitions/WechatAccountFields"
+                        },
+                        "description": "选定字段的公众号列表"
+                    },
+                    "400": {
+                        "schema": {
+                            "$ref": "#definitions/ApiError"
+                        },
+                        "description": "出错信息"
+                    }
+                }
+            }
+        },
+        "/projects/{project_id}/wechat-accounts/{wechat_id}": {
+            "delete": {
+                "summary": "删除公众号",
+                "tags": [
+                    "operations"
+                ],
+                "description": "删除公众号",
+                "parameters": [
+                    {
+                        "required": true,
+                        "type": "integer",
+                        "description": "当前项目id",
+                        "name": "project_id",
+                        "in": "path"
+                    },
+                    {
+                        "required": true,
+                        "type": "integer",
+                        "description": "公众号ID",
+                        "name": "wechat_id",
+                        "in": "path"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "schema": {
+                            "$ref": "#definitions/ApiSuccess"
+                        },
+                        "description": "OK"
+                    }
+                }
+            },
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "description": "更新公众号",
+                "responses": {
+                    "200": {
+                        "schema": {
+                            "$ref": "#definitions/ApiSuccess"
+                        },
+                        "description": "OK"
+                    },
+                    "400": {
+                        "schema": {
+                            "$ref": "#definitions/Api400Error"
+                        },
+                        "description": "BAD REQUEST"
+                    }
+                },
+                "summary": "更新公众号",
+                "tags": [
+                    "operations"
+                ],
+                "parameters": [
+                    {
+                        "required": true,
+                        "type": "integer",
+                        "description": "当前项目id",
+                        "name": "project_id",
+                        "in": "path"
+                    },
+                    {
+                        "required": true,
+                        "type": "integer",
+                        "description": "公众号id",
+                        "name": "wechat_id",
+                        "in": "path"
+                    },
+                    {
+                        "required": true,
+                        "schema": {
+                            "$ref": "#definitions/WechatAccount"
+                        },
+                        "description": "公众号内容",
+                        "name": "wechat_account",
+                        "in": "body"
+                    }
+                ]
+            }
+        },
+        "/messages": {
+            "get": {
+                "summary": "获取站内信列表",
+                "tags": [
+                    "message"
+                ],
+                "description": "获取站内信列表",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "当前页",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "每页条数",
+                        "name": "page_size",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "schema": {
+                            "$ref": "#definitions/MessageList"
+                        },
+                        "description": "站内信列表"
+                    }
+                }
+            }
+        },
+        "/messages/notify": {
+            "get": {
+                "summary": "获取未读站内信",
+                "tags": [
+                    "message"
+                ],
+                "description": "获取未读站内信",
+                "responses": {
+                    "200": {
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "unread": {
+                                    "type": "integer",
+                                    "description": "未读站内信条数"
+                                }
+                            }
+                        },
+                        "description": "系统提示"
+                    }
+                }
+            }
+        },
+        "/messages/{message_id}": {
+            "get": {
+                "summary": "获取站内信详情",
+                "tags": [
+                    "message"
+                ],
+                "description": "获取站内信详情",
+                "parameters": [
+                    {
+                        "required": true,
+                        "type": "integer",
+                        "description": "消息ID",
+                        "name": "message_id",
+                        "in": "path"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "schema": {
+                            "$ref": "#definitions/Message"
+                        },
+                        "description": "消息详情"
+                    },
+                    "404": {
+                        "schema": {
+                            "$ref": "#definitions/ApiError"
+                        },
+                        "description": "Not Found"
+                    }
+                }
+            },
+            "delete": {
+                "summary": "删除站内信",
+                "tags": [
+                    "message"
+                ],
+                "description": "删除站内信",
+                "parameters": [
+                    {
+                        "required": true,
+                        "type": "integer",
+                        "description": "站内信ID",
+                        "name": "message_id",
+                        "in": "path"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "schema": {
+                            "$ref": "#definitions/ApiSuccess"
+                        },
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/projects/{project_id}/import/users": {
+            "post": {
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "description": "导入项目用户数据",
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "400": {
+                        "schema": {
+                            "$ref": "#definitions/ApiError"
+                        },
+                        "description": "出错信息"
+                    }
+                },
+                "summary": "导入项目用户数据",
+                "tags": [
+                    "excel"
+                ],
+                "parameters": [
+                    {
+                        "required": true,
+                        "type": "integer",
+                        "description": "当前项目id",
+                        "name": "project_id",
+                        "in": "path"
+                    },
+                    {
+                        "required": true,
+                        "type": "file",
+                        "description": "要导入的用户excel文件",
+                        "name": "files",
+                        "in": "formData"
+                    }
+                ]
+            }
+        },
+        "/projects/{project_id}/files/template.xls": {
+            "get": {
+                "summary": "导出导入数据模版",
+                "description": "导出导入数据模版（如用户模版)",
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "500": {
+                        "schema": {
+                            "$ref": "#definitions/ApiError"
+                        },
+                        "description": "出错信息"
+                    }
+                },
+                "tags": [
+                    "excel"
+                ],
+                "produces": [
+                    "application/vnd.ms-excel"
+                ],
+                "parameters": [
+                    {
+                        "required": true,
+                        "type": "integer",
+                        "description": "当前项目id",
+                        "name": "project_id",
+                        "in": "path"
+                    },
+                    {
+                        "required": true,
+                        "type": "string",
+                        "description": "模版类型，支持类型 account",
+                        "name": "type",
+                        "in": "query"
+                    }
+                ]
+            }
+        },
+        "/projects/{project_id}/files/orders.xls": {
+            "get": {
+                "summary": "导出项目项目收款数据",
+                "description": "导出项目收款数据",
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "500": {
+                        "schema": {
+                            "$ref": "#definitions/ApiError"
+                        },
+                        "description": "出错信息"
+                    }
+                },
+                "tags": [
+                    "excel"
+                ],
+                "produces": [
+                    "application/vnd.ms-excel"
+                ],
+                "parameters": [
+                    {
+                        "required": true,
+                        "type": "integer",
+                        "description": "当前项目id",
+                        "name": "project_id",
+                        "in": "path"
+                    },
+                    {
+                        "required": true,
+                        "type": "string",
+                        "description": "开始日期, 日期格式YYYY-mm-dd",
+                        "name": "begin",
+                        "in": "query"
+                    },
+                    {
+                        "required": true,
+                        "type": "string",
+                        "description": "结束日期, 日期格式YYYY-mm-dd",
+                        "name": "end",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "套餐名",
+                        "name": "keyword",
+                        "in": "query"
+                    }
+                ]
+            }
+        },
+        "/projects/{project_id}/files/users.xls": {
+            "get": {
+                "summary": "导出项目用户数据数据",
+                "description": "导出项目用户数据数据",
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "500": {
+                        "schema": {
+                            "$ref": "#definitions/ApiError"
+                        },
+                        "description": "出错信息"
+                    }
+                },
+                "tags": [
+                    "excel"
+                ],
+                "produces": [
+                    "application/vnd.ms-excel"
+                ],
+                "parameters": [
+                    {
+                        "required": true,
+                        "type": "integer",
+                        "description": "当前项目id",
+                        "name": "project_id",
+                        "in": "path"
+                    }
+                ]
+            }
+        },
+        "/token/qiniu-uptoken": {
+            "get": {
+                "summary": "获取七牛上传token",
+                "tags": [
+                    "tool"
+                ],
+                "description": "获取七牛上传token",
+                "responses": {
+                    "200": {
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "uptoken": {
+                                    "type": "string",
+                                    "description": "前端上传所需的uptoken"
+                                }
+                            }
+                        },
+                        "description": "七牛前端上传token"
+                    }
+                }
+            }
+        }
+    },
+    "tags": [
+        {
+            "description": "项目管理",
+            "name": "project"
+        },
+        {
+            "description": "用户管理",
+            "name": "user"
+        },
+        {
+            "description": "标签管理",
+            "name": "tag"
+        },
+        {
+            "description": "报表",
+            "name": "excel"
+        },
+        {
+            "description": "计费管理",
+            "name": "billing"
+        },
+        {
+            "description": "运营管理",
+            "name": "operations"
+        },
+        {
+            "description": "站内信",
+            "name": "message"
+        },
+        {
+            "description": "工具",
+            "name": "tool"
+        }
+    ],
+    "info": {
+        "description": "壁咚项目管理后台API",
+        "title": "壁咚项目管理后台API",
+        "version": "1.0.0"
+    },
+    "parameters": {},
+    "definitions": {
+        "Tag": {
+            "required": [
+                "name",
+                "tag_type"
+            ],
+            "type": "object",
+            "properties": {
+                "tag_type": {
+                    "type": "string",
+                    "description": "标签类型, 选项[account, ap]"
+                },
+                "tagged_count": {
+                    "format": "int32",
+                    "type": "integer",
+                    "readOnly": true
+                },
+                "id": {
+                    "format": "int32",
+                    "type": "integer",
+                    "readOnly": true
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "User": {
+            "required": [
+                "attrs",
+                "mobile",
+                "name",
+                "tags"
+            ],
+            "type": "object",
+            "properties": {
+                "tags": {
+                    "items": {
+                        "format": "int32",
+                        "type": "integer"
+                    },
+                    "type": "array",
+                    "description": "标签ID列表"
+                },
+                "attrs": {
+                    "items": {
+                        "$ref": "#/definitions/AttrDict"
+                    },
+                    "type": "array",
+                    "description": "用户自定义属性"
+                },
+                "mobile": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "NetworkList": {
+            "required": [
+                "page",
+                "page_size",
+                "total_items",
+                "total_pages"
+            ],
+            "type": "object",
+            "properties": {
+                "objects": {
+                    "items": {
+                        "$ref": "#/definitions/Network"
+                    },
+                    "type": "array"
+                },
+                "page": {
+                    "format": "int32",
+                    "type": "integer"
+                },
+                "total_pages": {
+                    "format": "int32",
+                    "type": "integer"
+                },
+                "total_items": {
+                    "format": "int32",
+                    "type": "integer"
+                },
+                "page_size": {
+                    "format": "int32",
+                    "type": "integer"
+                }
+            }
+        },
+        "TagList": {
+            "type": "object",
+            "properties": {
+                "tags": {
+                    "items": {
+                        "$ref": "#/definitions/Tag"
+                    },
+                    "type": "array"
+                }
+            }
+        },
+        "APList": {
+            "required": [
+                "page",
+                "page_size",
+                "total_items",
+                "total_pages"
+            ],
+            "type": "object",
+            "properties": {
+                "objects": {
+                    "items": {
+                        "$ref": "#/definitions/APItem"
+                    },
+                    "type": "array"
+                },
+                "page": {
+                    "format": "int32",
+                    "type": "integer"
+                },
+                "total_pages": {
+                    "format": "int32",
+                    "type": "integer"
+                },
+                "total_items": {
+                    "format": "int32",
+                    "type": "integer"
+                },
+                "page_size": {
+                    "format": "int32",
+                    "type": "integer"
+                }
+            }
+        },
+        "ApiSuccess": {
+            "properties": {
+                "status_code": {
+                    "type": "integer",
+                    "default": 200
+                },
+                "message": {
+                    "type": "string",
+                    "default": "OK"
+                }
+            }
+        },
+        "AttachedTag": {
+            "type": "object",
+            "properties": {
+                "tags": {
+                    "items": {
+                        "format": "int32",
+                        "type": "integer"
+                    },
+                    "type": "array",
+                    "description": "标签id列表"
+                },
+                "users": {
+                    "items": {
+                        "format": "int32",
+                        "type": "integer"
+                    },
+                    "type": "array",
+                    "description": "用户id列表"
+                }
+            }
+        },
+        "UserItem": {
+            "type": "object",
+            "properties": {
+                "mobile": {
+                    "type": "string"
+                },
+                "address": {
+                    "type": "string"
+                },
+                "tags": {
+                    "type": "string"
+                },
+                "online": {
+                    "format": "int32",
+                    "type": "integer",
+                    "description": "在线状态 1 - 在线, 0 - 离线"
+                },
+                "id": {
+                    "format": "int32",
+                    "type": "integer",
+                    "description": "用户ID"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "Network": {
+            "required": [
+                "duration",
+                "is_free",
+                "is_public",
+                "mask",
+                "portal_id",
+                "session_timeout",
+                "ssid"
+            ],
+            "type": "object",
+            "properties": {
+                "is_free": {
+                    "format": "int32",
+                    "type": "integer",
+                    "description": "计费方式，免费 - 1, 收费- 0"
+                },
+                "portal_id": {
+                    "format": "int32",
+                    "type": "integer",
+                    "description": "portal页配置ID"
+                },
+                "mask": {
+                    "format": "int32",
+                    "type": "integer",
+                    "description": "认证方式, 用前三位表示, 1(001)-手机, 2(010)微信, 4(100)APP"
+                },
+                "ssid": {
+                    "type": "string",
+                    "description": "ssid"
+                },
+                "session_timeout": {
+                    "format": "int32",
+                    "type": "integer",
+                    "description": "会话过期时间"
+                },
+                "is_public": {
+                    "format": "int32",
+                    "type": "integer",
+                    "description": "网络类型，公有 - 1, 私有 - 0"
+                },
+                "duration": {
+                    "format": "int32",
+                    "type": "integer",
+                    "description": "免认证期限"
+                },
+                "id": {
+                    "format": "int32",
+                    "type": "integer",
+                    "description": "配置id，仅展示用",
+                    "readOnly": true
+                },
+                "wechat_account_id": {
+                    "format": "int32",
+                    "type": "integer",
+                    "description": "认证公众号ID"
+                }
+            }
+        },
+        "Dyncol": {
+            "type": "object",
+            "properties": {
+                "label": {
+                    "type": "string",
+                    "description": "动态列标题"
+                },
+                "id": {
+                    "format": "int32",
+                    "type": "integer",
+                    "description": "动态列id"
+                },
+                "col": {
+                    "type": "string",
+                    "description": "动态列字段名"
+                }
+            }
+        },
+        "PackageItem": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "description": "套餐名"
+                },
+                "time_length": {
+                    "type": "string",
+                    "description": "时长数"
+                },
+                "ends": {
+                    "format": "int32",
+                    "type": "integer",
+                    "description": "终端数"
+                },
+                "amount": {
+                    "type": "number",
+                    "description": "营收"
+                },
+                "tags": {
+                    "type": "string",
+                    "description": "投放范围"
+                },
+                "price": {
+                    "type": "number",
+                    "description": "金额"
+                },
+                "id": {
+                    "format": "int32",
+                    "type": "integer",
+                    "description": "套餐ID"
+                },
+                "until": {
+                    "type": "string",
+                    "description": "套餐有效期"
+                },
+                "created_at": {
+                    "type": "string",
+                    "description": "创建日期"
+                }
+            }
+        },
+        "DyncolList": {
+            "type": "object",
+            "properties": {
+                "setted": {
+                    "items": {
+                        "$ref": "#/definitions/Dyncol"
+                    },
+                    "type": "array",
+                    "description": "项目已选自定义字段"
+                },
+                "default": {
+                    "items": {
+                        "$ref": "#/definitions/Dyncol"
+                    },
+                    "type": "array",
+                    "description": "平台默认字段"
+                }
+            }
+        },
+        "MessageList": {
+            "required": [
+                "page",
+                "page_size",
+                "total_items",
+                "total_pages"
+            ],
+            "type": "object",
+            "properties": {
+                "objects": {
+                    "items": {
+                        "$ref": "#/definitions/MessageItem"
+                    },
+                    "type": "array"
+                },
+                "page": {
+                    "format": "int32",
+                    "type": "integer"
+                },
+                "total_pages": {
+                    "format": "int32",
+                    "type": "integer"
+                },
+                "total_items": {
+                    "format": "int32",
+                    "type": "integer"
+                },
+                "page_size": {
+                    "format": "int32",
+                    "type": "integer"
+                }
+            }
+        },
+        "PackageUpdate": {
+            "type": "object",
+            "properties": {
+                "until": {
+                    "type": "string",
+                    "description": "套餐过期时间"
+                },
+                "tag_list": {
+                    "items": {
+                        "format": "int32",
+                        "type": "integer"
+                    },
+                    "type": "array",
+                    "description": "标签ID列表"
+                }
+            }
+        },
+        "AP": {
+            "required": [
+                "address",
+                "mac",
+                "name",
+                "tags",
+                "vendor"
+            ],
+            "type": "object",
+            "properties": {
+                "tags": {
+                    "items": {
+                        "format": "int32",
+                        "type": "integer"
+                    },
+                    "type": "array",
+                    "description": "标签ID列表"
+                },
+                "name": {
+                    "type": "string",
+                    "description": "名称"
+                },
+                "vendor": {
+                    "type": "string",
+                    "description": "品牌"
+                },
+                "address": {
+                    "type": "string",
+                    "description": "位置信息"
+                },
+                "mac": {
+                    "type": "string",
+                    "description": "MAC地址"
+                }
+            }
+        },
+        "ApiError": {
+            "properties": {
+                "status_code": {
+                    "type": "integer",
+                    "description": "状态码, 参见HTTP常见状态码"
+                },
+                "message": {
+                    "type": "string",
+                    "description": "出错信息"
+                }
+            }
+        },
+        "Message": {
+            "type": "object",
+            "properties": {
+                "content": {
+                    "type": "string",
+                    "description": "内容"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string",
+                    "description": "标题"
+                },
+                "status": {
+                    "format": "int32",
+                    "type": "integer",
+                    "description": "站内信状态，0 - 未读，1 - 已读"
+                }
+            }
+        },
+        "MessageItem": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "format": "int32",
+                    "type": "integer",
+                    "description": "站内信ID"
+                },
+                "title": {
+                    "type": "string",
+                    "description": "标题"
+                },
+                "status": {
+                    "format": "int32",
+                    "type": "integer",
+                    "description": "站内信状态, 0 - 未读, 1 - 已读"
+                }
+            }
+        },
+        "VisitorUserList": {
+            "required": [
+                "page",
+                "page_size",
+                "total_items",
+                "total_pages"
+            ],
+            "type": "object",
+            "properties": {
+                "objects": {
+                    "items": {
+                        "$ref": "#/definitions/VisitorUser"
+                    },
+                    "type": "array"
+                },
+                "page": {
+                    "format": "int32",
+                    "type": "integer"
+                },
+                "total_pages": {
+                    "format": "int32",
+                    "type": "integer"
+                },
+                "total_items": {
+                    "format": "int32",
+                    "type": "integer"
+                },
+                "page_size": {
+                    "format": "int32",
+                    "type": "integer"
+                }
+            }
+        },
+        "APItem": {
+            "type": "object",
+            "properties": {
+                "address": {
+                    "type": "string",
+                    "description": "位置"
+                },
+                "mac": {
+                    "type": "string"
+                },
+                "tags": {
+                    "type": "string",
+                    "description": "标签"
+                },
+                "id": {
+                    "format": "int32",
+                    "type": "integer",
+                    "description": "AP id"
+                },
+                "online": {
+                    "format": "int32",
+                    "type": "integer",
+                    "description": "是否在线, 0 - 离线，1 - 在线"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "conns": {
+                    "format": "int32",
+                    "type": "integer",
+                    "description": "在线人数"
+                },
+                "vendor": {
+                    "type": "string",
+                    "description": "品牌"
+                }
+            }
+        },
+        "WechatAccountFields": {
+            "type": "object",
+            "properties": {
+                "objects": {
+                    "items": {
+                        "type": "object"
+                    },
+                    "type": "array",
+                    "description": "选择字段字典列表"
+                }
+            }
+        },
+        "VisitorUser": {
+            "type": "object",
+            "properties": {
+                "user": {
+                    "type": "string",
+                    "description": "手机号码或微信昵称"
+                },
+                "address": {
+                    "type": "string",
+                    "description": "当前位置"
+                },
+                "auth_type": {
+                    "format": "int32",
+                    "type": "integer",
+                    "description": "认证方式, 0 - 账号, 1 - 手机号, 2 - 微信, 4 - App"
+                },
+                "userid": {
+                    "format": "int32",
+                    "type": "integer",
+                    "description": "用户ID"
+                },
+                "connect_at": {
+                    "type": "string"
+                },
+                "traffic": {
+                    "format": "int32",
+                    "type": "integer"
+                }
+            }
+        },
+        "APTag": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "format": "int32",
+                    "type": "integer",
+                    "description": "标签id"
+                },
+                "name": {
+                    "type": "string",
+                    "description": "标签名"
+                }
+            }
+        },
+        "PackageList": {
+            "required": [
+                "page",
+                "page_size",
+                "total_items",
+                "total_pages"
+            ],
+            "type": "object",
+            "properties": {
+                "objects": {
+                    "items": {
+                        "$ref": "#/definitions/PackageItem"
+                    },
+                    "type": "array"
+                },
+                "page": {
+                    "format": "int32",
+                    "type": "integer"
+                },
+                "total_pages": {
+                    "format": "int32",
+                    "type": "integer"
+                },
+                "total_items": {
+                    "format": "int32",
+                    "type": "integer"
+                },
+                "page_size": {
+                    "format": "int32",
+                    "type": "integer"
+                }
+            }
+        },
+        "Portal": {
+            "required": [
+                "mobile_banner_url",
+                "mobile_title",
+                "name",
+                "pc_banner_url",
+                "pc_title"
+            ],
+            "type": "object",
+            "properties": {
+                "pc_banner_url": {
+                    "type": "string"
+                },
+                "mobile_title": {
+                    "type": "string",
+                    "description": "移动端文案内容"
+                },
+                "mobile_banner_url": {
+                    "type": "string",
+                    "description": "移动端banner图片url"
+                },
+                "pc_title": {
+                    "type": "string"
+                },
+                "note": {
+                    "type": "string",
+                    "description": "备注"
+                },
+                "name": {
+                    "type": "string",
+                    "description": "portal模版名"
+                }
+            }
+        },
+        "Api400Error": {
+            "properties": {
+                "status_code": {
+                    "type": "integer",
+                    "description": "状态码, 参见HTTP常见状态码"
+                },
+                "message": {
+                    "type": "string",
+                    "description": "出错信息"
+                },
+                "errors": {
+                    "$ref": "#definitions/Error",
+                    "type": "array",
+                    "description": "字段出错信息，仅在HTTP状态码为400有这个字段"
+                }
+            }
+        },
+        "Error": {
+            "properties": {
+                "field": {
+                    "$ref": "#definitions/ErrorMsg",
+                    "type": "array"
+                }
+            }
+        },
+        "UserDetail": {
+            "type": "object",
+            "properties": {
+                "tags": {
+                    "items": {
+                        "$ref": "#/definitions/UserTag"
+                    },
+                    "type": "array",
+                    "description": "用户标签列表"
+                },
+                "attrs": {
+                    "items": {
+                        "$ref": "#/definitions/UserAttr"
+                    },
+                    "type": "array",
+                    "description": "用户自定义属性字典列表"
+                },
+                "mobile": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "nickname": {
+                    "type": "string"
+                }
+            }
+        },
+        "ErrorMsg": {
+            "properties": {
+                "field": {
+                    "type": "string",
+                    "description": "字段出错信息"
+                }
+            }
+        },
+        "PortalList": {
+            "type": "object",
+            "properties": {
+                "objects": {
+                    "items": {
+                        "$ref": "#/definitions/PortalItem"
+                    },
+                    "type": "array"
+                }
+            }
+        },
+        "OrderChart": {
+            "type": "object",
+            "properties": {
+                "amounts": {
+                    "items": {
+                        "format": "float",
+                        "type": "number"
+                    },
+                    "type": "array",
+                    "description": "与日期对应数据"
+                },
+                "title": {
+                    "type": "string",
+                    "description": "图表标题"
+                },
+                "dates": {
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array",
+                    "description": "日期列表"
+                }
+            }
+        },
+        "AttrDict": {
+            "required": [
+                "col",
+                "value"
+            ],
+            "type": "object",
+            "properties": {
+                "value": {
+                    "type": "string",
+                    "description": "属性值"
+                },
+                "col": {
+                    "format": "int32",
+                    "type": "integer",
+                    "description": "用户自定义属性id"
+                }
+            }
+        },
+        "Package": {
+            "required": [
+                "name",
+                "price"
+            ],
+            "type": "object",
+            "properties": {
+                "expired": {
+                    "type": "string",
+                    "description": "指定日期, 天数和指定日期二选其一"
+                },
+                "time": {
+                    "format": "int32",
+                    "type": "integer",
+                    "description": "天数"
+                },
+                "ends": {
+                    "format": "int32",
+                    "type": "integer",
+                    "description": "终端",
+                    "default": 1
+                },
+                "until": {
+                    "type": "string",
+                    "description": "套餐有效期, 日期格式YYYY-mm-dd"
+                },
+                "tag_list": {
+                    "items": {
+                        "format": "int32",
+                        "type": "integer"
+                    },
+                    "type": "array",
+                    "description": "标签ID列表(在展示是与tags一一对应)"
+                },
+                "tags": {
+                    "readOnly": true,
+                    "type": "string",
+                    "description": "投放标签（仅在展示有）"
+                },
+                "price": {
+                    "type": "number",
+                    "description": "金额"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "UserList": {
+            "required": [
+                "page",
+                "page_size",
+                "total_items",
+                "total_pages"
+            ],
+            "type": "object",
+            "properties": {
+                "objects": {
+                    "items": {
+                        "$ref": "#/definitions/UserItem"
+                    },
+                    "type": "array"
+                },
+                "page": {
+                    "format": "int32",
+                    "type": "integer"
+                },
+                "total_pages": {
+                    "format": "int32",
+                    "type": "integer"
+                },
+                "total_items": {
+                    "format": "int32",
+                    "type": "integer"
+                },
+                "page_size": {
+                    "format": "int32",
+                    "type": "integer"
+                }
+            }
+        },
+        "PortalItem": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "description": "portal名称"
+                },
+                "is_platform": {
+                    "format": "int32",
+                    "type": "integer",
+                    "description": "是否为平台模版",
+                    "default": 0
+                },
+                "updated_at": {
+                    "type": "string",
+                    "description": "更新日期"
+                },
+                "id": {
+                    "format": "int32",
+                    "type": "integer",
+                    "description": "id"
+                },
+                "note": {
+                    "type": "string",
+                    "description": "备注"
+                },
+                "created_at": {
+                    "type": "string",
+                    "description": "创建日期"
+                }
+            }
+        },
+        "WechatAccount": {
+            "required": [
+                "appid",
+                "name",
+                "secret",
+                "shopid"
+            ],
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "readOnly": true,
+                    "type": "string"
+                },
+                "shopid": {
+                    "type": "string"
+                },
+                "appid": {
+                    "type": "string"
+                },
+                "id": {
+                    "format": "int32",
+                    "type": "integer",
+                    "description": "公众号ID",
+                    "readOnly": true
+                },
+                "note": {
+                    "type": "string",
+                    "description": "备注"
+                },
+                "secret": {
+                    "type": "string"
+                }
+            }
+        },
+        "WechatAccountList": {
+            "required": [
+                "page",
+                "page_size",
+                "total_items",
+                "total_pages"
+            ],
+            "type": "object",
+            "properties": {
+                "objects": {
+                    "items": {
+                        "$ref": "#/definitions/WechatAccount"
+                    },
+                    "type": "array"
+                },
+                "page": {
+                    "format": "int32",
+                    "type": "integer"
+                },
+                "total_pages": {
+                    "format": "int32",
+                    "type": "integer"
+                },
+                "total_items": {
+                    "format": "int32",
+                    "type": "integer"
+                },
+                "page_size": {
+                    "format": "int32",
+                    "type": "integer"
+                }
+            }
+        },
+        "OrderList": {
+            "required": [
+                "page",
+                "page_size",
+                "total_items",
+                "total_pages"
+            ],
+            "type": "object",
+            "properties": {
+                "objects": {
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "pay_from": {
+                                "type": "string",
+                                "description": "充值入口"
+                            },
+                            "package_name": {
+                                "type": "string",
+                                "description": "套餐"
+                            },
+                            "amount": {
+                                "type": "number",
+                                "description": "金额"
+                            },
+                            "pay_with": {
+                                "type": "string",
+                                "description": "支付方式"
+                            },
+                            "mobile": {
+                                "type": "string"
+                            },
+                            "username": {
+                                "type": "string",
+                                "description": "姓名"
+                            },
+                            "created_at": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "type": "array"
+                },
+                "page": {
+                    "format": "int32",
+                    "type": "integer"
+                },
+                "total_pages": {
+                    "format": "int32",
+                    "type": "integer"
+                },
+                "total_items": {
+                    "format": "int32",
+                    "type": "integer"
+                },
+                "page_size": {
+                    "format": "int32",
+                    "type": "integer"
+                }
+            }
+        },
+        "UserAttr": {
+            "type": "object",
+            "properties": {
+                "label": {
+                    "type": "string",
+                    "description": "字段标题"
+                },
+                "id": {
+                    "format": "int32",
+                    "type": "integer",
+                    "description": "自定义属性id"
+                },
+                "value": {
+                    "type": "string",
+                    "description": "字段值"
+                },
+                "col": {
+                    "type": "string",
+                    "description": "字段名，图片类会以_image结尾"
+                }
+            }
+        },
+        "DyncolIdList": {
+            "required": [
+                "cols"
+            ],
+            "type": "object",
+            "properties": {
+                "cols": {
+                    "items": {
+                        "format": "int32",
+                        "type": "integer"
+                    },
+                    "type": "array"
+                }
+            }
+        },
+        "UserTag": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "format": "int32",
+                    "type": "integer",
+                    "description": "标签id"
+                },
+                "name": {
+                    "type": "string",
+                    "description": "标签名"
+                }
+            }
+        }
+    }
+}
