@@ -1,3 +1,6 @@
+from bidong.common.utils import generate_random_number
+
+
 class Operator:
     GET = "8"
     POST = "4"
@@ -46,3 +49,24 @@ def ensure_method_as_list(method):
         if each & method == each:
             result.append(method_int_convert(each))
     return result
+
+
+def generate_id(max_retry=3, duplicate_checker=None):
+    """
+    :param max_retry: 最大重复生成次数,超过将抛出异常
+    :param duplicate_checker: 查重方法,如果其返回结果为True, 将再生成一次. 
+    :return: 
+    """
+    while max_retry > 0:
+        while 1:
+            _id = "1" + generate_random_number(9)
+            if len(_id) == 10:
+                break
+        if duplicate_checker:
+            if duplicate_checker(_id):
+                max_retry -= 1
+            else:
+                return _id
+        else:
+            return _id
+    raise Exception("_id Max Retries")

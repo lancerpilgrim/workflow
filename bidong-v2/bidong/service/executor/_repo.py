@@ -2,7 +2,7 @@ import time
 from sqlalchemy.orm.exc import NoResultFound
 from bidong.core.exceptions import DuplicateError
 from bidong.storage.models import Administrators, Managers
-from bidong.common.utils import generate_random_id, ObjectDict, dictize
+from bidong.common.utils import generate_random_number, ObjectDict, dictize
 from bidong.core.repo import BaseRepo
 from bidong.core.paginator import Paginator
 from bidong.core.database import session
@@ -68,7 +68,7 @@ class ExecutorsRepo(BaseRepo):
     def _generate_id(self, max_retry=3):
         while max_retry > 0:
             while 1:
-                _id = "1" + generate_random_id(9)
+                _id = "1" + generate_random_number(9)
                 if len(_id) == 10:
                     break
             print(_id)

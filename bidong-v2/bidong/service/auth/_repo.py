@@ -38,7 +38,7 @@ from bidong.storage.models import (
     ManagersAuthorization,
     ProjectsAuthorization
 )
-from bidong.common.utils import generate_random_id, ObjectDict, dictize
+from bidong.common.utils import generate_random_number, ObjectDict, dictize
 from bidong.core.repo import BaseRepo
 from bidong.core.database import session
 

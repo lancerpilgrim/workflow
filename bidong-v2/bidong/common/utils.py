@@ -144,7 +144,7 @@ def timeit(func):
     return wrapper
 
 
-def generate_random_id(l=9):
+def generate_random_number(l=9):
     strings = []
     for x in range(l):
         strings.append(str(random.randint(0, 10)))

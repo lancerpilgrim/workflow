@@ -1,6 +1,6 @@
 import time
 
-from bidong.common.utils import ObjectDict, get_dict_attribute, dictize, generate_random_id
+from bidong.common.utils import ObjectDict, get_dict_attribute, dictize, generate_random_number
 from bidong.service.v2.repo.ProjectsRepository import (
     ProjectAuthsRepository,
     ProjectsAuthsQuery,
@@ -280,7 +280,7 @@ class ProjectOverviewsDomain(object):
         def _generate_id(self, max_retry=3):
             while max_retry > 0:
                 while 1:
-                    _id = "1" + generate_random_id(9)
+                    _id = "1" + generate_random_number(9)
                     if len(_id) == 10:
                         break
                 if self.id_exists(_id):

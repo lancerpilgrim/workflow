@@ -1,6 +1,6 @@
 import time
 
-from bidong.common.utils import ObjectDict, get_dict_attribute, dictize, generate_random_id
+from bidong.common.utils import ObjectDict, get_dict_attribute, dictize, generate_random_number
 from bidong.service.v2.repo.AdministratorsRepository import (
     AdministratorAuthsRepository,
     AdministratorsAuthsQuery,
@@ -67,6 +67,7 @@ class AdministratorAuthsDomain(object):
     @property
     def struct(self):
         # 返回结构化的授权信息
+
         authorizations = ObjectDict()
         authorizations.id = self.id
         authorizations.features = []
@@ -252,7 +253,7 @@ class AdministratorOverviewsDomain(object):
 
         def __init__(self, overviews):
             """
-            :param overviews: a instance of ObjectDict? 
+            :param overviews: a instance of Dict? 
             """
             self.id = overviews.get("id")
             self.name = overviews.get("name", "")
@@ -264,22 +265,10 @@ class AdministratorOverviewsDomain(object):
 
         def validate(self):
             if not self.id:
-                self.id = self._generate_id()
+                self.id = generate_id(duplicate_checker=self.id_exists)
                 self.create_time = int(time.time())
             if not self.status:
                 self.status = self.ENABLED
-
-        def _generate_id(self, max_retry=3):
-            while max_retry > 0:
-                while 1:
-                    _id = "1" + generate_random_id(9)
-                    if len(_id) == 10:
-                        break
-                if self.id_exists(_id):
-                    max_retry -= 1
-                else:
-                    return _id
-            raise Exception("_id Max Retries")
 
         @staticmethod
         def id_exists(_id):
