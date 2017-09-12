@@ -83,4 +83,6 @@ routers = [
     (r'/{version}/test/administrators/(?P<administrator_id>\d+)/authorizations$'.format(version=version),
      test.AdministratorAuthorizationsHandler),
 
+    (r'/{version}/test/managers$'.format(version=version),
+     test.ManagersHandler),
 ]

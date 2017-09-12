@@ -189,3 +189,7 @@ def get_dict_attribute(resource_dict, attr):
     for j in range(len(attr_hierarchy)):
         value = next(_item)
     return attr_hierarchy[-1], value
+
+
+def get_current_timestamp():
+    return int(time.time())

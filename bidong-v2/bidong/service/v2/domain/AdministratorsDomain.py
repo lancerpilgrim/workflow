@@ -1,6 +1,5 @@
-import time
-
-from bidong.common.utils import ObjectDict, get_dict_attribute, dictize, generate_random_number
+from bidong.core.exceptions import NotFoundError
+from bidong.common.utils import ObjectDict, dictize, get_current_timestamp
 from bidong.service.v2.repo.AdministratorsRepository import (
     AdministratorAuthsRepository,
     AdministratorsAuthsQuery,
@@ -66,6 +65,13 @@ class AdministratorAuthsDomain(object):
 
     def save(self):
         AdministratorAuthsRepository().persist(self.auth_entities_map)
+        return self
+
+    def ensure_existence(self):
+        # 校验用户存在性
+        a = AdministratorOverviewsQuery().get_by_id(self.id).one()
+        if a and a.status == AdministratorOverviewsDomain.AdministratorOverviewsEntity.DELETE:
+            raise NotFoundError("用户不存在")
         return self
 
     @property
@@ -240,6 +246,11 @@ class AdministratorOverviewsDomain(object):
         AdministratorOverviewsRepository().persist(self.administrator_entity)
         return self
 
+    def ensure_existence(self):
+        if self.administrator_entity.status == self.AdministratorOverviewsEntity.DELETE:
+            raise NotFoundError("用户不存在")
+        return self
+
     def disable(self):
         self.administrator_entity.status = self.AdministratorOverviewsEntity.DISABLED
         return self
@@ -266,7 +277,7 @@ class AdministratorOverviewsDomain(object):
             self.mobile = overviews.get("mobile")
             self.create_time = overviews.get("create_time")
             self.description = overviews.get("description")
-            self.status = overviews.get("status")
+            self.status = overviews.get("status", None)
             self.validate()
 
         def validate(self):
@@ -275,8 +286,8 @@ class AdministratorOverviewsDomain(object):
                 self.create_time = _overviews.create_time
             if not self.id:
                 self.id = generate_id(duplicate_checker=self.id_exists)
-                self.create_time = int(time.time())
-            if not self.status:
+                self.create_time = get_current_timestamp()
+            if self.status is None:
                 self.status = self.ENABLED
 
         @staticmethod
@@ -315,3 +326,8 @@ class AdministratorDomain(object):
         self.od = self.od.save()
         self.ad = self.ad.save()
         return self
+
+    def ensure_existence(self):
+        self.od.ensure_existence()
+        return self
+

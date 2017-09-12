@@ -13,6 +13,7 @@ def __map_resource_name():
             __[each.private_name] = each.public_name
     return _, __
 
+
 PLATFORM_RESOURCES_MAP, CLIENT_RESOURCES_MAP = __map_resource_name()
 REVERSED_PLATFORM_RESOURCES_MAP = {v: k for k, v in PLATFORM_RESOURCES_MAP.items()}
 REVERSED_CLIENT_RESOURCES_MAP = {v: k for k, v in CLIENT_RESOURCES_MAP.items()}
@@ -100,5 +101,3 @@ REVERSED_CLIENT_RESOURCES_MAP = {v: k for k, v in CLIENT_RESOURCES_MAP.items()}
 # 10.
 # 随时根据业务需要补充
 #
-
-

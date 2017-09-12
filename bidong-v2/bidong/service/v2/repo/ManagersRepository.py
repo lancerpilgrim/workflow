@@ -1,141 +1,296 @@
-import time
-from sqlalchemy.orm.exc import NoResultFound
-from bidong.core.exceptions import DuplicateError
-from bidong.storage.models import Administrators, Managers
-from bidong.common.utils import generate_random_number, ObjectDict, dictize
-from bidong.core.repo import BaseRepo
-from bidong.core.paginator import Paginator
+# 一九二七年春，帕斯捷尔纳克致茨维塔耶娃:
+#
+# 　　我们多么草率地成为了孤儿。玛琳娜，
+# 　　这是我最后一次呼唤你的名字。
+# 　　 大雪落在
+# 　　我锈迹斑斑的气管和肺叶上，
+# 　　说吧：今夜，我的嗓音是一列被截停的火车，
+# 　　你的名字是俄罗斯漫长的国境线。
+# 　　
+# 　　我想象我们的相遇，在一场隆重的死亡背面
+# 　　（玫瑰的矛盾贯穿了他硕大的心）；
+# 　　在一九二七年春夜，我们在国境线相遇
+# 　　因此错过了
+# 　　 这个呼啸着奔向终点的世界。
+# 　　而今夜，你是舞曲，世界是错误。
+# 　　
+# 　　当新年的钟声敲响的时候，百合花盛放
+# 　　——他以他的死宣告了世纪的终结，
+# 　　而不是我们尴尬的生存。
+# 　　 为什么我要对你们沉默？
+# 　　当华尔兹舞曲奏起的时候，我在谢幕。
+# 　　因为今夜，你是旋转，我是迷失。
+# 　　
+# 　　当你转换舞伴的时候，我将在世界的留言册上
+# 　　抹去我的名字。
+# 　　 玛琳娜，国境线的舞会
+# 　　停止，大雪落向我们各自孤单的命运。
+# 　　我歌唱了这寒冷的春天，我歌唱了我们的废墟
+# 　　……然后我又将沉默不语。
+# 　　
+# 　　
+# 　　 1999.4.27
+
+
 from bidong.core.database import session
+from bidong.core.paginator import Paginator
+from bidong.service.v2.repo import BaseQuerySet
+from bidong.storage.models import (
+    ResourceRegistry,
+    ManagersAuthorization,
+    Managers
+)
+from bidong.common.utils import (
+    ObjectDict,
+    dictize
+)
 
 
-class ExecutorsRepo(BaseRepo):
+class ManagerAuthsRepository(object):
+    def __init__(self):
+        self.r = None
+        # TODO 操作记录
 
-    def __init__(self, executor):
-        self.Executor = executor
-        self.r = session.query(self.Executor)
+    def persist(self, entities):
+        rs = []
+        for (admin_id, resource_name, resource_locator), attrs in entities.items():
+            rs.append(self._insert_or_update(admin_id, resource_name, resource_locator, attrs))
+        return rs
 
-    def create(self, param_dict):
-        mobile = param_dict["mobile"]
-        if self.get_by_mobile(mobile) is not None:
-            raise DuplicateError(message="手机号已存在")
-        if "create_time" not in param_dict:
-            param_dict["create_time"] = int(time.time())
-        _id = self._generate_id()
-        param_dict.update({"id": _id})
-        executor = self.Executor(**param_dict)
-        session.add(executor)
+    def _insert_or_update(self, holder_id, resource_name, resource_locator, attrs):
+        q = session.query(ManagersAuthorization).filter(
+            ManagersAuthorization.authorization_holder == holder_id,
+            ManagersAuthorization.resource_name == resource_name,
+            ManagersAuthorization.resource_locator == resource_locator,
+        )
+        if not session.query(q.exists()).scalar():
+            return self._create(attrs.auth, attrs.resource)
+        else:
+            return self._reset(attrs.auth, attrs.resource)
+
+    @staticmethod
+    def _create(auth, resource):
+        """
+        :param resource: A Resource object, 至少含有 `id`, `name`, `locator`等属性
+        :param auth: 授权信息, 至少含有 `holder`,`allow_method` 属性
+        :return:
+        """
+        r = ManagersAuthorization(authorization_holder=auth.holder,
+                                  holder_type=auth.holder_type,
+                                  resource_id=resource.id,
+                                  resource_name=resource.name,
+                                  resource_locator=resource.locator,
+                                  allow_method=auth.allow_method,
+                                  status=auth.status
+                                  )
+        session.add(r)
         session.flush()
-        return ObjectDict(dictize(executor))
+        return ObjectDict(dictize(r))
 
-    def order_by_id(self, desc=False):
-        if desc:
-            return self.r.order_by(self.Executor.id.desc())
-        return self.r.order_by(self.Executor.id)
+    @staticmethod
+    def _reset(auth, resource):
+        r = session.query(ManagersAuthorization).filter(
+            ManagersAuthorization.authorization_holder == auth.holder,
+            ManagersAuthorization.resource_name == resource.name,
+            ManagersAuthorization.resource_locator == resource.locator,
+        ).update(
+            dict(
+                authorization_holder=auth.holder,
+                holder_type=auth.holder_type,
+                resource_id=resource.id,
+                resource_name=resource.name,
+                resource_locator=resource.locator,
+                allow_method=auth.allow_method,
+                status=auth.status),
+            synchronize_session=False)
+        r = session.query(ManagersAuthorization).filter(
+            ManagersAuthorization.authorization_holder == auth.holder,
+            ManagersAuthorization.resource_name == resource.name,
+            ManagersAuthorization.resource_locator == resource.locator,
+        )
+        return ObjectDict(dictize(r.one()))
+
+
+class ManagersAuthsQuery(BaseQuerySet):
+    def __init__(self):
+        self.r = None
+        self.paginator = None
+
+    def paginate(self, paginator):
+        self.paginator = paginator
+
+    def list_user_features(self, manager_id):
+        self.r = session.query(ManagersAuthorization).filter(
+            ManagersAuthorization.authorization_holder == manager_id).join(
+            ResourceRegistry, ManagersAuthorization.resource_id == ResourceRegistry.id).filter(
+            ResourceRegistry.resource_type == ResourceRegistry.FEATURE
+        )
+        return self
+
+    def list_user_data(self, manager_id):
+        self.r = session.query(ManagersAuthorization).filter(
+            ManagersAuthorization.authorization_holder == manager_id).join(
+            ResourceRegistry, ManagersAuthorization.resource_id == ResourceRegistry.id).filter(
+            ResourceRegistry.resource_type == ResourceRegistry.DATA
+        )
+        return self
+
+    def locate_user_auth_by_resource(self, manager_id, resource):
+        # 只通过联合索引获取记录，其余交给业务逻辑，提高性能
+        self.r = session.query(ManagersAuthorization).filter(
+            ManagersAuthorization.authorization_holder == manager_id,
+            ManagersAuthorization.resource_name == resource.name,
+            ManagersAuthorization.resource_locator == resource.locator,
+        )
+        return self
+
+    def _instantiate(self, *args, **kwargs):
+        pagination = ObjectDict({})
+        if self.paginator is None:
+            rs = [ObjectDict(dictize(each)) for each in self.r.all()]
+        else:
+            if self.paginator.sort:
+                self.r = self.r.order_by(self.paginator.sort)
+            p = Paginator(self.r, self.paginator.page, self.paginator.per_page).to_dict()
+            rs = [ObjectDict(dictize(each)) for each in p.pop("objects")]
+            pagination = p
+        return rs, pagination
+
+
+class ManagerOverviewsRepository(object):
+    """
+    在现在的设计中，repository仅负责持久化，查询任务交给专门的Query
+    """
+
+    def __init__(self):
+        self.r = None
+        # TODO 操作记录
+
+    def persist(self, entity):
+        r = self._insert_or_update(entity)
+        return r
+
+    def _insert_or_update(self, entity):
+        q = session.query(Managers).filter(
+            Managers.id == entity.id,
+        )
+        if not session.query(q.exists()).scalar():
+            return self._create(entity)
+        else:
+            return self._reset(entity)
+
+    @staticmethod
+    def _create(entity):
+        """
+        :param entity: A Manager object
+        :return: created object
+        """
+        r = Managers(id=entity.id,
+                     name=entity.name,
+                     status=entity.status,
+                     mobile=entity.mobile,
+                     create_time=entity.create_time,
+                     description=entity.description
+                     )
+        session.add(r)
+        session.flush()
+        return ObjectDict(dictize(r))
+
+    @staticmethod
+    def _reset(entity):
+        q = session.query(Managers).filter(
+            Managers.id == entity.id,
+        )
+        print(q)
+        r = q.update(
+            dict(name=entity.name,
+                 status=entity.status,
+                 mobile=entity.mobile,
+                 description=entity.description),
+            synchronize_session=False
+        )
+        session.flush()
+        r = session.query(Managers).filter(
+            Managers.id == entity.id,
+        )
+        print(r)
+        return ObjectDict(dictize(r.one()))
+
+
+class ManagerOverviewsQuery(BaseQuerySet):
+    def __init__(self):
+        self.r = None
+
+    def get_by_id(self, manager_id):
+        self.r = session.query(Managers).filter(Managers.id == manager_id)
+        return self
+
+    def get_by_mobile(self, mobile):
+        self.r = self.r.filter(Managers.mobile == mobile)
+        return self
+
+    def exists(self):
+        return session.query(self.r.exists()).scalar()
+
+    def _instantiate(self, *args, **kwargs):
+        r = self.r.one_or_none()
+        if r is None:
+            return None
+        return ObjectDict(dictize(r))
+
+
+class ManagersOverviewsQuery(BaseQuerySet):
+    def __init__(self):
+        self.r = session.query(Managers)
+        self.paginator = None
+
+    def paginate(self, paginator):
+        self.paginator = paginator
+        page = self.paginator.get("page")
+        per_page = self.paginator.get("per_page")
+        if not page or not per_page:
+            self.paginator = None
+        return self
 
     def order_by_create_time(self, desc=False):
         if desc:
-            self.r = self.r.order_by(self.Executor.create_time.desc())
-        self.r = self.r.order_by(self.Executor.create_time)
+            self.r = self.r.order_by(Managers.create_time.desc())
+        self.r = self.r.order_by(Managers.create_time)
+        return self
 
-    def get_by_mobile(self, mobile):
-        self.r = self.r.filter(self.Executor.mobile == mobile)
-        return self.r.first()
+    def filter_by_mobile(self, mobile):
+        self.r = self.r.filter(Managers.mobile.like("%{0}%".format(mobile)))
+        return self
 
     def filter_by_name(self, name):
-        self.r = self.r.filter(self.Executor.name == name)
+        self.r = self.r.filter(Managers.name.like("%{0}%".format(name)))
         return self
 
     def filter_enabled(self):
-        self.r = self.r.filter(self.Executor.status == self.Executor.ENABLED)
+        self.r = self.r.filter(Managers.status == Managers.ENABLED)
         return self
 
     def filter_disabled(self):
-        self.r = self.r.filter(self.Executor.status == self.Executor.DISABLED)
+        self.r = self.r.filter(Managers.status == Managers.DISABLED)
         return self
 
-    def _generate_id(self, max_retry=3):
-        while max_retry > 0:
-            while 1:
-                _id = "1" + generate_random_number(9)
-                if len(_id) == 10:
-                    break
-            print(_id)
-            if self._primary_key_conflicted(_id):
-                max_retry -= 1
-            else:
-                return _id
-        raise Exception("_id Max Retries")
-
-    def _primary_key_conflicted(self, _id):
-        q = session.query(self.Executor).filter(self.Executor.id == _id)
-        return session.query(q.exists()).scalar()
-
-    def _instantiate(self, page, per_page, sort, order):
-        if sort:
-            self.r.order_by(sort)
-        if not (page and per_page):
-            res = ObjectDict({})
-            res.objects = [ObjectDict(dictize(each)) for each in self.r.all()]
-        else:
-            res = ObjectDict(Paginator(self.r, page, per_page).to_dict())
-            res.objects = [ObjectDict(dictize(each)) for each in res.objects]
-        return res
-
-
-class ExecutorRepo(BaseRepo):
-    DISABLED = 0
-    ENABLED = 1
-    DELETE = 2
-
-    def __init__(self, executor, _id):
-        self.Executor = executor
-        self._id = _id
-        self.r = None
-
-    def get_by_pk(self):
-        self.r = session.query(self.Executor).filter(self.Executor.id == self._id)
+    def filter_deleted(self):
+        self.r = self.r.filter(Managers.status == Managers.DELETE)
         return self
 
-    def update(self, param_dict):
-        self.r.update(param_dict, synchronize_session=False)
-        return self
-
-    def delete(self):
-        self.r.update({"status": self.Executor.DELETE}, synchronize_session=False)
-        return self
-
-    def disable(self):
-        self.r.update({"status": self.Executor.DISABLED}, synchronize_session=False)
-        return self
-
-    def enable(self):
-        self.r.update({"status": self.Executor.ENABLED}, synchronize_session=False)
+    def exclude_deleted(self):
+        self.r = self.r.filter(Managers.status.in_((Managers.ENABLED, Managers.DISABLED)))
         return self
 
     def _instantiate(self):
-        res = self.r.one_or_none()
-        if res is None:
-            raise NoResultFound
-        if res.status == self.Executor.DELETE:
-            raise NoResultFound
-        return ObjectDict(dictize(self.r.one()))
-
-
-class AdministratorsRepo(ExecutorsRepo):
-    def __init__(self):
-        super(AdministratorsRepo, self).__init__(Administrators)
-
-
-class ManagersRepo(ExecutorsRepo):
-    def __init__(self):
-        super(ManagersRepo, self).__init__(Managers)
-
-
-class AdministratorRepo(ExecutorRepo):
-    def __init__(self, _id):
-        super(AdministratorRepo, self).__init__(Administrators, _id)
-
-
-class ManagerRepo(ExecutorRepo):
-    def __init__(self, _id):
-        super(ManagerRepo, self).__init__(Managers, _id)
+        rs = ObjectDict()
+        pagination = ObjectDict()
+        if self.paginator is None:
+            rs.update({each.id: ObjectDict(dictize(each)) for each in self.r.all()})
+        else:
+            if self.paginator.sort:
+                self.r = self.r.order_by(self.paginator.sort)
+            p = Paginator(self.r, self.paginator.page, self.paginator.per_page).to_dict()
+            rs.update({each.id: ObjectDict(dictize(each)) for each in p.pop("objects")})
+            pagination = p
+        return rs, pagination

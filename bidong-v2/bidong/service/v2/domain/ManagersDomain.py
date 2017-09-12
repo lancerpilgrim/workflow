@@ -1,11 +1,15 @@
-from bidong.common.utils import ObjectDict, get_dict_attribute
-from bidong.service.v2.repo.AdministratorsRepository import (
-    AdministratorAuthsRepository,
-    AdministratorsAuthsQuery
-)
+from bidong.core.exceptions import NotFoundError
+from bidong.common.utils import ObjectDict, dictize, get_current_timestamp
+from bidong.service.v2.repo.ManagersRepository import (
+    ManagerAuthsRepository,
+    ManagersAuthsQuery,
+    ManagerOverviewsRepository, ManagerOverviewsQuery)
 from bidong.service.v2.repo import ResourcesQuery
 from bidong.service.v2.domain.ValueObjects import Resource, Auth
 from bidong.service.v2.domain.DomainTools import *
+from bidong.service.v2.domain import REVERSED_CLIENT_RESOURCES_MAP, REVERSED_PLATFORM_RESOURCES_MAP, \
+    PLATFORM_RESOURCES_MAP, CLIENT_RESOURCES_MAP
+from pprint import pprint
 
 DEFAULT_METHOD_LIST = ["DELETE", "PUT", "POST", "GET"]
 
@@ -14,17 +18,103 @@ class ManagerAuthsDomain(object):
     """
     平台管理员的权限聚合
     """
-    def __init__(self, administrator_id):
-        self.id = administrator_id
+
+    def __init__(self, manager_id, resources_auths=None):
+        self.id = manager_id
+        self._resources_auths = resources_auths
         self.auth_entities_map = {}
-        self.auth_entities = []
+        self.auth_entities_list = None
         # 实际上, auth_entity的真正的实体id是它在auth_entities中的key, 因为这个key被设计成独一无二
         # 在仓储中, id已经存在的实体会执行更新操作, id不存在的则执行新建操作, 这不需要被Domain感知到
         # Repository只包含Command, 实际只需要GetByEntityId和Save即可, Query由专门的Query类承担.
 
+    def construct_entities(self):
+        if self._resources_auths:
+            self.reset(self._resources_auths)
+        else:
+            self._construct_current_entities()
+        return self
+
+    def _construct_current_entities(self):
+        # 功能性资源
+        query, p = ManagersAuthsQuery().list_user_features(self.id).all()
+        for q in query:
+            auth_entity = self.ManagerAuthEntity(self.id,
+                                                 Resource(q.resource_name,
+                                                          q.resource_locator,
+                                                          resource_type=Resource.FEATURE),
+                                                 Auth(self.id,
+                                                      status=q.status,
+                                                      allow_method=q.allow_method))
+            self.auth_entities_map[(self.id, q.resource_name, q.resource_locator)] = auth_entity
+        # 数据性资源
+        query, p = ManagersAuthsQuery().list_user_data(self.id).all()
+        for q in query:
+            auth_entity = self.ManagerAuthEntity(self.id,
+                                                 Resource(q.resource_name,
+                                                          q.resource_locator,
+                                                          resource_type=Resource.DATA),
+                                                 Auth(self.id,
+                                                      status=q.status,
+                                                      allow_method=q.allow_method))
+            self.auth_entities_map[(self.id, q.resource_name, q.resource_locator)] = auth_entity
+        return self
+
+    def save(self):
+        ManagerAuthsRepository().persist(self.auth_entities_map)
+        return self
+
+    def ensure_existence(self):
+        # 校验用户存在性
+        a = ManagerOverviewsQuery().get_by_id(self.id).one()
+        if a and a.status == ManagerOverviewsDomain.ManagerOverviewsEntity.DELETE:
+            raise NotFoundError("用户不存在")
+        return self
+
+    @property
+    def struct(self):
+        # 返回结构化的授权信息
+        authorizations = ObjectDict()
+        authorizations.id = self.id
+        authorizations.contents = ObjectDict()
+
+        for each in self.auth_entities_map.values():
+            if each.auth.status != Auth.ENABLED:
+                continue
+            locator = each.resource.locator
+            project_id = locator
+            if each.resource.resource_type == Resource.DATA:
+                # todo 这里暂时是没有的
+                avo = ObjectDict(dictize(self.ManagerAuthDataVO(each.resource, each.auth)))
+                if project_id in authorizations.contents:
+                    if hasattr(authorizations.contents[project_id], "data"):
+                        authorizations.contents[project_id].data.append(avo)
+                    else:
+                        authorizations.contents[project_id].data = [avo]
+                else:
+                    item = ObjectDict()
+                    item.data = [avo]
+                    item.project_id = each.resource.locator
+                    authorizations.contents[project_id] = item
+            if each.resource.resource_type == Resource.FEATURE:
+                fvo = ObjectDict(dictize(self.ManagerAuthFeatureVO(each.resource, each.auth)))
+                if project_id in authorizations.contents:
+                    if hasattr(authorizations.contents[project_id], "features"):
+                        authorizations.contents[project_id].features.append(fvo)
+                    else:
+                        authorizations.contents[project_id].features = [fvo]
+                else:
+                    item = ObjectDict()
+                    item.features = [fvo]
+                    item.project_id = each.resource.locator
+                    item.project_name = "-"
+                    authorizations.contents[project_id] = item
+        authorizations.contents = list(authorizations.contents.values())
+        return authorizations
+
     def reset(self, resources_auths):
         """
-        :brief 完整地重新定义所有权限，不在auths列表中的原有权限都将被置为DELETE状态, 已经存在的将被更新, 
+        :brief 完整地重新定义所有权限，不在auths列表中的原有权限都将被置为DELETE状态, 已经存在的将被更新,
                新增的权限将被创建. 权限设置的逻辑是这样的: 对于前端来说实现patch式的更新是相对繁琐的操作,
                所以在实现上, 每次都会重新定义一个用户的权限, 即Reset. 这种情况下新建和更新是同一的.
         :param resources_auths: a nested list [(resource, auth), ....]
@@ -33,10 +123,10 @@ class ManagerAuthsDomain(object):
         :return: 更新后的权限列表
         """
         # 构建现有权限实体
-        self.construct_current_entities()
+        self._construct_current_entities()
 
         # 计算得到新的权限实体
-        existing = {key: value.auth.allow_method for key, value in self.auth_entities_map.items()}
+        existing = {key: value for key, value in self.auth_entities_map.items()}
         pending = {(self.id, resource.name, str(resource.locator)): ensure_method_as_int(auth.allow_method)
                    for (resource, auth) in resources_auths}
         union = set(pending).union(existing)
@@ -44,69 +134,47 @@ class ManagerAuthsDomain(object):
         to_update = set(pending).intersection(existing)
         to_create = set(union).difference(existing)
         for key in to_delete:
-            self.auth_entities_map[key](
-                self.AdministratorAuthEntity(self.id,
-                                             Resource(*key),
-                                             Auth(self.id, status=Auth.DELETE)))
+            self.auth_entities_map[key] = self.ManagerAuthEntity(self.id,
+                                                                 Resource(*key[1:]),
+                                                                 Auth(self.id, status=Auth.DELETE))
         for key in to_update:
-            self.auth_entities_map[key](
-                self.AdministratorAuthEntity(self.id,
-                                             Resource(*key),
-                                             Auth(self.id,
-                                                  status=Auth.ENABLED,
-                                                  allow_method=pending[key])))
+            self.auth_entities_map[key] = self.ManagerAuthEntity(self.id,
+                                                                 Resource(*key[1:]),
+                                                                 Auth(self.id,
+                                                                      status=Auth.ENABLED,
+                                                                      allow_method=pending[key]))
         for key in to_create:
-            self.auth_entities_map[key](
-                self.AdministratorAuthEntity(self.id,
-                                             Resource(*key),
-                                             Auth(self.id,
-                                                  status=Auth.ENABLED,
-                                                  allow_method=pending[key])))
+            self.auth_entities_map[key] = self.ManagerAuthEntity(self.id,
+                                                                 Resource(*key[1:]),
+                                                                 Auth(self.id,
+                                                                      status=Auth.ENABLED,
+                                                                      allow_method=pending[key]))
         # 在生命周期的某个时候持久化本聚合中的实体
         return self
 
-    def construct_current_entities(self):
-        query = AdministratorsAuthsQuery().list_user_features(self.id).all()
-        for q in query:
-            auth_entity = self.AdministratorAuthEntity(self.id,
-                                                       Resource(q.resouce_name, q.resource_locator),
-                                                       Auth(self.id,
-                                                            status=q.status,
-                                                            allow_method=q.allow_method))
-            self.auth_entities_map[(self.id, q.resouce_name, q.resource_locator)] = auth_entity
-        return self
-
-    def save(self):
-        self.auth_entities = AdministratorAuthsRepository().persist(self.auth_entities_map)
-        return self
-
-    def get_entities(self):
-        # 返回实体列表
-        return self.auth_entities
-
     def disable_one_auth(self, resource):
-        self._add_entities(resource, Auth(self.id, status=Auth.DISABLED))
+        self._add_entities_to_map(resource, Auth(self.id, status=Auth.DISABLED))
         return self
 
     def enable_one_auth(self, resource):
-        self._add_entities(resource, Auth(self.id, status=Auth.ENABLED))
+        self._add_entities_to_map(resource, Auth(self.id, status=Auth.ENABLED))
         return self
 
     def delete_one_auth(self, resource):
-        self._add_entities(resource, Auth(self.id, status=Auth.DELETE))
+        self._add_entities_to_map(resource, Auth(self.id, status=Auth.DELETE))
         return self
 
-    def _add_entities(self, resource, auth):
-        auth_entity = self.AdministratorAuthEntity(self.id, resource, auth)
+    def _add_entities_to_map(self, resource, auth):
+        auth_entity = self.ManagerAuthEntity(self.id, resource, auth)
         self.auth_entities_map[(self.id, resource.name, resource.locator)] = auth_entity
 
-    class AdministratorAuthEntity(object):
-        def __init__(self, administrator_id, resource, auth):
+    class ManagerAuthEntity(object):
+        def __init__(self, manager_id, resource, auth):
             """
-            :param administrator_id: 
-            :param resource: a instance of Resource 
+            :param manager_id:
+            :param resource: a instance of Resource
             """
-            self.id = administrator_id
+            self.id = manager_id
             self.resource = resource
             self.auth = auth
             self.validate()
@@ -119,161 +187,162 @@ class ManagerAuthsDomain(object):
             self.auth.allow_method = ensure_method_as_int(self.auth.allow_method)
 
         def _ensure_resource(self):
-            self.resource.id = ResourcesQuery().locate_by_name(self.resource.name).one().id
+            r = ResourcesQuery().locate_by_name(self.resource.name).one()
+            self.resource.id = r.id
+            self.resource.resource_type = r.resource_type
+
+    class ManagerAuthDataVO(object):
+
+        def __init__(self, resource, auth):
+            self._resource = resource
+            self._auth = auth
+            self.name = None
+            self.description = None
+            self.allow_method = None
+            self.data_id = None
+            self.struct()
+
+        def struct(self):
+            self.name = self._resource.name
+            self.allow_method = ensure_method_as_list(self._auth.allow_method)
+            self.description = self._get_description()
+            self.data_id = self._resource.locator
+
+        def _get_description(self):
+            # TODO 获取名字
+            if self.name == "platform_project_data":
+                return "测试项目"
+            return "测试项目"
+
+    class ManagerAuthFeatureVO(object):
+        def __init__(self, resource, auth):
+            self._resource = resource
+            self._auth = auth
+            self.name = None
+            self.description = None
+            self.allow_method = None
+            self.struct()
+
+        def struct(self):
+            self.name = self._resource.name
+            self.allow_method = ensure_method_as_list(self._auth.allow_method)
+            self.description = REVERSED_CLIENT_RESOURCES_MAP[self.name]
 
 
-class ManagersService(object):
+class ManagerOverviewsDomain(object):
+    """
+    平台管理员的基础信息聚合,　可以根据id构建出聚合的结构, 也可以根据输入参数来决定.
+    """
 
-    def __init__(self):
-        self.repo = ManagersRepo()
+    def __init__(self, manager_id=None, overviews=None):
+        self._overviews = overviews
+        self._manager_id = manager_id
+        self.manager_entity = None
+        self.id = None
 
-    def get_by_mobile(self, mobile):
-        return self.repo.get_by_mobile(mobile)
+    def construct_entities(self):
+        if self._overviews is None and self._manager_id is None:
+            raise Exception()
+        if self._overviews and self._manager_id is None:
+            self.manager_entity = self.ManagerOverviewsEntity(self._overviews)
+        if self._overviews and self._manager_id:
+            self._overviews.update(id=self._manager_id)
+            self.manager_entity = self.ManagerOverviewsEntity(self._overviews)
+        if not self._overviews and self._manager_id:
+            q = ManagerOverviewsQuery().get_by_id(self._manager_id).one()
+            self.manager_entity = self.ManagerOverviewsEntity(q)
+        self.id = self.manager_entity.id
+        return self
 
-    def integrated_create(self, overviews=None, authorizations=None):
-        item = ObjectDict({})
-        item.overviews = self.create_overviews(overviews)
-        item.authorizations = self.create_authorizations(item.overviews.id, authorizations)
-        item.id = item.overviews.id
+    @property
+    def struct(self):
+        return ObjectDict(dictize(self.manager_entity))
 
-        # 初始化手机号密码登录
-        from bidong.service.login import ManagerPasswordLoginService
-        ps = ManagerPasswordLoginService(item.overviews.mobile)
-        ps.init_user_login_info(item.id)
+    def save(self):
+        ManagerOverviewsRepository().persist(self.manager_entity)
+        return self
 
-        return item
-
-    def create_overviews(self, overviews):
-        overviews = self.repo.create(overviews)
-        return overviews
-
-    @staticmethod
-    def create_authorizations(manager_id, authorizations):
-        auth_service = ManagerAuthsService(manager_id)
-        projects = authorizations["contents"]
-        authorizations_parameters = []
-        for project in projects:
-            locator = project["project_id"]
-            for feature in project["features"]:
-                if "allow_method" not in feature.keys():
-                    feature["allow_method"] = ["DELETE", "PUT", "POST", "GET"]
-                p = (Resource(feature["name"], locator), Auth(manager_id, feature["allow_method"]))
-                authorizations_parameters.append(p)
-        authorizations = auth_service._integrated_create_or_update(authorizations_parameters).list()
-        return authorizations
-
-    def get_details(self, page, per_page, sort="", order=""):
-        payload = ObjectDict({})
-        overviews = self.get_overviews(page, per_page, sort, order)
-        content = []
-        # 添加授权信息
-        for overview in overviews.objects:
-            item = ObjectDict({})
-            item.authorizations = ManagerService(overview.id).get_authorizations()
-            item.overviews = overview
-            item.id = item.overviews.id
-            content.append(item)
-        payload.update(overviews)
-        payload.objects = content
-        return payload
-
-    def get_fields(self, fields):
-        payload = ObjectDict({"objects": []})
-        overviews = self.get_overviews(0, 0)
-        # 添加授权信息
-        for overview in overviews.objects:
-            item = ObjectDict({})
-            item.authorizations = ManagerService(overview.id).get_authorizations()
-            item.overviews = overview
-            item.id = item.overviews.id
-            downsized_item = {}
-            for field in fields.split(","):
-                try:
-                    key, value = get_dict_attribute(item, field)
-                    downsized_item[key] = value
-                except Exception:
-                    raise InvalidParametersError(message="`fields`參數有誤")
-            payload.objects.append(downsized_item)
-        print(payload)
-        return payload
-
-    def get_overviews(self, page, per_page, sort="", order=""):
-        return self.repo.filter_enabled().all(page, per_page, sort, order)
-
-
-class ManagerService(object):
-
-    def __init__(self, _id):
-        self._id = _id
-        self.repo = ManagerRepo(_id)
-
-    def get_details(self):
-        item = ObjectDict({})
-        item.overviews = self.get_overviews()
-        item.authorizations = self.get_authorizations()
-        item.id = self._id
-        return item
-
-    def get_authorizations(self):
-        auth_service = ManagerAuthsService(self._id)
-        authorizations = auth_service.list()
-        return authorizations
-
-    def get_overviews(self):
-        self.repo.get_by_pk()
-        return self.repo.one()
-
-    def exists(self):
-        try:
-            self.get_overviews()
-        except Exception:
-            return False
-        else:
-            return True
-
-    def check_enable(self):
-        try:
-            assert self.get_overviews().status == self.repo.ENABLED
-        except Exception:
-            return False
-        else:
-            return True
-
-    def integrated_update(self, overviews=None, authorizations=None):
-        item = ObjectDict({})
-        item.overviews = self.update_overviews(overviews)
-        item.authorizations = self.update_authorizations(authorizations)
-        item.id = item.overviews.id
-        return item
-
-    def update_overviews(self, overviews=None):
-        self.repo.get_by_pk()
-        overviews = self.repo.update(overviews).one()
-        return overviews
-
-    def update_authorizations(self, authorizations=None):
-        auth_service = ManagerAuthsService(self._id)
-        projects = authorizations["contents"]
-        authorizations_parameters = []
-        for project in projects:
-            locator = project["project_id"]
-            for feature in project["features"]:
-                if "allow_method" not in feature.keys():
-                    feature["allow_method"] = ["DELETE", "PUT", "POST", "GET"]
-                p = (Resource(feature["name"], locator), Auth(self._id, feature["allow_method"]))
-                authorizations_parameters.append(p)
-        authorizations = auth_service._integrated_create_or_update(authorizations_parameters).list()
-
-        return authorizations
+    def ensure_existence(self):
+        if self.manager_entity.status == self.ManagerOverviewsEntity.DELETE:
+            raise NotFoundError("用户不存在")
+        return self
 
     def disable(self):
-        self.repo.get_by_pk()
-        self.repo.disable()
+        self.manager_entity.status = self.ManagerOverviewsEntity.DISABLED
+        return self
 
     def enable(self):
-        self.repo.get_by_pk()
-        self.repo.enable()
+        self.manager_entity.status = self.ManagerOverviewsEntity.ENABLED
+        return self
 
     def delete(self):
-        self.repo.get_by_pk()
-        self.repo.delete()
+        self.manager_entity.status = self.ManagerOverviewsEntity.DELETE
+        return self
+
+    class ManagerOverviewsEntity(object):
+        ENABLED = 1
+        DISABLED = 0
+        DELETE = 2
+
+        def __init__(self, overviews):
+            """
+            :param overviews: a instance of Dict?
+            """
+            self.id = overviews.get("id")
+            self.name = overviews.get("name", "")
+            self.mobile = overviews.get("mobile")
+            self.create_time = overviews.get("create_time")
+            self.description = overviews.get("description")
+            self.status = overviews.get("status", None)
+            self.validate()
+
+        def validate(self):
+            if self.id and not self.create_time:
+                _overviews = ManagerOverviewsQuery().get_by_id(self.id).one()
+                self.create_time = _overviews.create_time
+            if not self.id:
+                self.id = generate_id(duplicate_checker=self.id_exists)
+                self.create_time = get_current_timestamp()
+            if self.status is None:
+                self.status = self.ENABLED
+
+        @staticmethod
+        def id_exists(_id):
+            return ManagerOverviewsQuery().get_by_id(_id).exists()
+
+
+class ManagerDomain(object):
+    def __init__(self, manager_id=None, overviews=None, resources_auths=None):
+        self.overviews = None
+        self.authorizations = None
+        self.id = None
+        self.od = None
+        self.ad = None
+        self._id = manager_id
+        self._overviews = overviews
+        self._resources_auths = resources_auths
+
+    def construct_entities(self):
+        self.od = ManagerOverviewsDomain(self._id, self._overviews)
+        self.overviews = self.od.construct_entities().struct
+        self.id = self.overviews.id
+        self.ad = ManagerAuthsDomain(self.id, self._resources_auths)
+        self.authorizations = self.ad.construct_entities().struct
+        return self
+
+    @property
+    def struct(self):
+        manager = ObjectDict()
+        manager.overviews = self.overviews
+        manager.authorizations = self.authorizations
+        manager.id = self.id
+        return manager
+
+    def save(self):
+        self.od = self.od.save()
+        self.ad = self.ad.save()
+        return self
+
+    def ensure_existence(self):
+        self.od.ensure_existence()
+        return self

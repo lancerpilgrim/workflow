@@ -119,7 +119,7 @@ CREATE TABLE `bd_ac` (
   `coa_port` smallint(6) NOT NULL DEFAULT '3799' COMMENT '管理后台不对改字段做配置',
   `pip` varchar(15) NOT NULL DEFAULT '' COMMENT '映射公网地址',
   `port` smallint(6) unsigned NOT NULL DEFAULT '0' COMMENT '映射公网端口',
-  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `created_at` datetime NOT NULL null COMMENT '创建时间',
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_ac_ip` (`ip`)
 ) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8;
@@ -151,8 +151,8 @@ CREATE TABLE `bd_account` (
   `coin` int(11) unsigned DEFAULT '0' COMMENT '壁咚币, 1壁咚币=10分钟',
   `ends` smallint(5) unsigned DEFAULT '1' COMMENT '同时上网终端上限',
   `mobile` varchar(17) NOT NULL DEFAULT '' COMMENT '用户手机号码',
-  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  `created_at` datetime  COMMENT '创建时间',
+  `updated_at` datetime COMMENT '更新时间',
   `nickname` varchar(64) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_account_user` (`user`),
@@ -181,13 +181,13 @@ CREATE TABLE `bd_account_policy` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `account_id` int(11) unsigned NOT NULL COMMENT '项目账号关联的平台用户',
   `mask` int(11) NOT NULL DEFAULT '0' COMMENT '项目账号标识,mask & (1 << 30) > 0账号被停用',
-  `expired` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '用户上网到期时间, NULL为无限期',
+  `expired` datetime COMMENT '用户上网到期时间, NULL为无限期',
   `ends` int(11) unsigned DEFAULT '1' COMMENT '同时上网终端上限',
   `uplink` int(11) unsigned DEFAULT '0' COMMENT '账号上行带宽, 默认为0',
   `downlink` int(11) unsigned DEFAULT '0' COMMENT '账号下行带宽',
   `pn` varchar(32) NOT NULL COMMENT '所属项目id',
-  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  `created_at` datetime COMMENT '创建时间',
+  `updated_at` datetime  COMMENT '更新时间',
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_account_user_pn` (`account_id`,`pn`)
 ) ENGINE=InnoDB AUTO_INCREMENT=12000 DEFAULT CHARSET=utf8;
@@ -216,8 +216,8 @@ CREATE TABLE `bd_account_profile` (
   `name` varchar(64) DEFAULT NULL COMMENT '项目内用户姓名',
   `mobile` varchar(17) DEFAULT NULL COMMENT '用户手机',
   `dyncol` mediumblob COMMENT '动态列',
-  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  `created_at` datetime COMMENT '创建时间',
+  `updated_at` datetime COMMENT '更新时间',
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_profile_pn_mobile` (`pn`,`account_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=12116 DEFAULT CHARSET=utf8;
@@ -229,7 +229,7 @@ CREATE TABLE `bd_account_profile` (
 
 LOCK TABLES `bd_account_profile` WRITE;
 /*!40000 ALTER TABLE `bd_account_profile` DISABLE KEYS */;
-INSERT INTO `bd_account_profile` VALUES (12000,1,12000,'阿斯蒂芬','13322223333','\0C\0\0\0\0\0�\0	\0�\0\0#\0�\0�(\035\0noteemailtitlecompanyid_numberdepartmentid_back_imageid_front_image!教导处!!经理!siov1!!人事部!http://or7x902xd.bkt.clouddn.com/FmmoRJooQn6b4FM36zXps6_dpAvi!http://or7x902xd.bkt.clouddn.com/FmmoRJooQn6b4FM36zXps6_dpAvi','2017-07-28 15:18:20','2017-08-23 09:11:16'),(12001,1,12001,'老大哥','13399998888','\0\0\0\0\0\03\0\0\�\0notecompanydepartment!12!点对点!单独','2017-07-28 17:48:38','2017-08-01 11:10:59'),(12002,1,12004,'奥德赛','13233334444','\0\0\0\0\0\0#\0\0C\0notecompanydepartment!2!2!2','2017-07-31 10:19:18','2017-08-01 11:24:09'),(12003,1,12005,'张里','13333333333','\0\0\0\0\0\0#\0\0C\0notecompanydepartment!3!1!2dd','2017-07-31 10:20:18','2017-08-01 14:00:28'),(12005,12,12013,'Wong','13612444229',NULL,'2017-08-01 10:05:45','2017-08-01 10:05:45'),(12021,1,12027,'Duel','13722232223','\0#\0\0\0\0\0\0\0#\0\03\0notecompanydepartmentid_front_image!!!!1','2017-08-01 14:43:56','2017-08-01 14:43:56'),(12025,1,12031,'Peif','13888888888','\0C\0\0\0\0\0C\0	\0�\0\0\�\0\03\0s(\0�5\0noteemailtitlecompanyid_numberdepartmentid_back_imageid_front_image!ddd!wwww!engi!SIOV!ddd!develop!!','2017-08-04 10:13:26','2017-08-10 10:31:43'),(12026,1,12032,'Ysfe','13688875468','\0C\0\0\0\0\0\0	\0#\0\03\0\0C\0\0S\0(\0c\05\0s\0noteemailtitlecompanyid_numberdepartmentid_back_imageid_front_image!!!!!!!!','2017-08-04 10:13:47','2017-08-31 15:04:54'),(12027,1,12033,'Ysfe','13688875123','\05\0\0\0\0\0\0\0#\0\Z\03\0\'\0C\0companyid_numberdepartmentid_back_imageid_front_image!!!!!','2017-08-04 10:13:53','2017-08-04 10:13:53'),(12028,1,12034,'Vrad','13688871234','\05\0\0\0\0\0\0\0#\0\Z\03\0\'\0C\0companyid_numberdepartmentid_back_imageid_front_image!!!!!','2017-08-04 10:14:20','2017-08-04 10:14:20'),(12029,1,12035,'Vab','13688871233','\05\0\0\0\0\0\0\0#\0\Z\03\0\'\0C\0companyid_numberdepartmentid_back_imageid_front_image!!!!!','2017-08-04 10:14:29','2017-08-04 10:14:29'),(12030,1,12036,'Vab','13683871233','\05\0\0\0\0\0\0\0#\0\Z\03\0\'\0C\0companyid_numberdepartmentid_back_imageid_front_image!!!!!','2017-08-04 10:14:36','2017-08-04 10:14:36'),(12031,1,12037,'Vaba','13383871233','\05\0\0\0\0\0\0\0#\0\Z\03\0\'\0C\0companyid_numberdepartmentid_back_imageid_front_image!!!!!','2017-08-04 10:14:44','2017-08-04 10:14:44'),(12032,1,12038,'Vaba','13383871238','\05\0\0\0\0\0\0\0#\0\Z\03\0\'\0C\0companyid_numberdepartmentid_back_imageid_front_image!!!!!','2017-08-04 10:14:48','2017-08-04 10:14:48'),(12033,1,12039,'Vaba','13383871638','\05\0\0\0\0\0\0\0#\0\Z\03\0\'\0C\0companyid_numberdepartmentid_back_imageid_front_image!!!!!','2017-08-04 10:14:51','2017-08-04 10:14:51'),(12035,1,12041,'Vaba','13385871678','\05\0\0\0\0\0\0\0#\0\Z\03\0\'\0C\0companyid_numberdepartmentid_back_imageid_front_image!!!!!','2017-08-04 10:14:55','2017-08-04 10:14:55'),(12036,1,12042,'Vaba','13385771678','\05\0\0\0\0\0\0\0#\0\Z\03\0\'\0C\0companyid_numberdepartmentid_back_imageid_front_image!!!!!','2017-08-04 10:14:58','2017-08-04 10:14:58'),(12037,1,12043,'Vaba','13385771878','\05\0\0\0\0\0\0\0#\0\Z\03\0\'\0C\0companyid_numberdepartmentid_back_imageid_front_image!!!!!','2017-08-04 10:15:01','2017-08-04 10:15:01'),(12038,1,12044,'Vaba','13389771878','\05\0\0\0\0\0\0\0#\0\Z\03\0\'\0C\0companyid_numberdepartmentid_back_imageid_front_image!!!!!','2017-08-04 10:15:04','2017-08-04 10:15:04'),(12039,1,12045,'Vaba','13389771578','\05\0\0\0\0\0\0\0#\0\Z\03\0\'\0C\0companyid_numberdepartmentid_back_imageid_front_image!!!!!','2017-08-04 10:15:06','2017-08-04 10:15:06'),(12042,1,12048,'Vaba','13380071570','\05\0\0\0\0\0\0\0#\0\Z\03\0\'\0C\0companyid_numberdepartmentid_back_imageid_front_image!!!!!','2017-08-04 10:15:19','2017-08-04 10:15:19'),(12043,1,12049,'Vaba','13380001570','\05\0\0\0\0\0\0\0#\0\Z\03\0\'\0C\0companyid_numberdepartmentid_back_imageid_front_image!!!!!','2017-08-04 10:15:21','2017-08-04 10:15:21'),(12044,1,12050,'Vaba','13380000570','\05\0\0\0\0\0\0\0#\0\Z\03\0\'\0C\0companyid_numberdepartmentid_back_imageid_front_image!!!!!','2017-08-04 10:15:23','2017-08-04 10:15:23'),(12045,1,12051,'Vaba','13380000070','\05\0\0\0\0\0\0\0#\0\Z\03\0\'\0C\0companyid_numberdepartmentid_back_imageid_front_image!!!!!','2017-08-04 10:15:26','2017-08-04 10:15:26'),(12046,1,12052,'Vaba','13380000000','\05\0\0\0\0\0\0\0#\0\Z\03\0\'\0C\0companyid_numberdepartmentid_back_imageid_front_image!!!!!','2017-08-04 10:15:28','2017-08-04 10:15:28'),(12047,1,12053,'Vaba','13380000001','\05\0\0\0\0\0\0\0#\0\Z\03\0\'\0C\0companyid_numberdepartmentid_back_imageid_front_image!!!!!','2017-08-04 10:15:33','2017-08-04 10:15:33'),(12048,1,12054,'Vaba','13380002001','\05\0\0\0\0\0\0\0#\0\Z\03\0\'\0C\0companyid_numberdepartmentid_back_imageid_front_image!!!!!','2017-08-04 10:15:40','2017-08-04 10:15:40'),(12049,1,12055,'Vaba','13380002201','\05\0\0\0\0\0\0\0#\0\Z\03\0\'\0C\0companyid_numberdepartmentid_back_imageid_front_image!!!!!','2017-08-04 10:15:46','2017-08-04 10:15:46'),(12050,1,12056,'Vaba','13381002201','\05\0\0\0\0\0\0\0#\0\Z\03\0\'\0C\0companyid_numberdepartmentid_back_imageid_front_image!!!!!','2017-08-04 10:15:50','2017-08-04 10:15:50'),(12051,1,12057,'Vaba','13381102201','\05\0\0\0\0\0\0\0#\0\Z\03\0\'\0C\0companyid_numberdepartmentid_back_imageid_front_image!!!!!','2017-08-04 10:15:54','2017-08-04 10:15:54'),(12052,1,12058,'Vaba','13381112201','\05\0\0\0\0\0\0\0#\0\Z\03\0\'\0C\0companyid_numberdepartmentid_back_imageid_front_image!!!!!','2017-08-04 10:15:56','2017-08-04 10:15:56'),(12053,1,12059,'Vaba','13381111201','\05\0\0\0\0\0\0\0#\0\Z\03\0\'\0C\0companyid_numberdepartmentid_back_imageid_front_image!!!!!','2017-08-04 10:15:59','2017-08-04 10:15:59'),(12054,1,12060,'Vaba','13381111101','\05\0\0\0\0\0\0\0#\0\Z\03\0\'\0C\0companyid_numberdepartmentid_back_imageid_front_image!!!!!','2017-08-04 10:16:02','2017-08-04 10:16:02'),(12055,1,12061,'Vaba','13381111111','\05\0\0\0\0\0\0\0#\0\Z\03\0\'\0C\0companyid_numberdepartmentid_back_imageid_front_image!!!!!','2017-08-04 10:16:04','2017-08-04 10:16:04'),(12056,1,12062,'Vaba','13382111111','\05\0\0\0\0\0\0\0#\0\Z\03\0\'\0C\0companyid_numberdepartmentid_back_imageid_front_image!!!!!','2017-08-04 10:16:07','2017-08-04 10:16:07'),(12057,1,12063,'Vaba','13382211111','\05\0\0\0\0\0\0\0#\0\Z\03\0\'\0C\0companyid_numberdepartmentid_back_imageid_front_image!!!!!','2017-08-04 10:16:09','2017-08-04 10:16:09'),(12058,1,12064,'Vaba','13382221111','\05\0\0\0\0\0\0\0#\0\Z\03\0\'\0C\0companyid_numberdepartmentid_back_imageid_front_image!!!!!','2017-08-04 10:16:13','2017-08-04 10:16:13'),(12059,1,12065,'黄丽的','18825111149','\0(\0\0\0\0\0c\0	\0\�\0\0S\0�\0�noteemailtitlecompanyid_numberdepartment!22222!xxx.xxx!扫地!SIOV!2222!研发','2017-08-09 16:03:33','2017-08-09 16:03:33'),(12060,1,12066,'Psa','18898986565','\0(\0\0\0\0\0\0	\0#\0\03\0\0C\0\0S\0noteemailtitlecompanyid_numberdepartment!!!!!!','2017-08-10 16:03:28','2017-08-10 16:03:28'),(12061,1,12067,'Piso','13900908888','\0(\0\0\0\0\0\0	\0#\0\03\0\0C\0\0S\0noteemailtitlecompanyid_numberdepartment!!!!!!','2017-08-10 16:04:12','2017-08-10 16:04:12'),(12062,1,12098,'Imp1','13800138656','\0(\0\0\0\0\0\0	\0�\0\0\�\0\0\0#noteemailtitlecompanyid_numberdepartment!!sa@sa.com!sa!sa!!sa','2017-08-15 16:22:43','2017-08-15 16:22:43'),(12063,1,12099,'Imp2','13200138656','\0(\0\0\0\0\0\0	\0�\0\0\�\0\0\0#noteemailtitlecompanyid_numberdepartment!!sa@sa.com!sa!sa!!sa','2017-08-15 16:41:15','2017-08-15 16:41:15'),(12064,1,12100,'Aaaa1','13899892312','\0(\0\0\0\0\0\0	\0#\0\03\0\0C\0\0S\0noteemailtitlecompanyid_numberdepartment!!!!!!','2017-08-15 16:49:39','2017-08-15 16:49:39'),(12065,1,12101,'Aaab2','13899892313','\0(\0\0\0\0\0\0	\0#\0\03\0\0C\0\0S\0noteemailtitlecompanyid_numberdepartment!!!!!!','2017-08-15 16:49:39','2017-08-15 16:49:39'),(12066,1,12102,'Aaaa3','13899892314','\0(\0\0\0\0\0\0	\0#\0\03\0\0C\0\0S\0noteemailtitlecompanyid_numberdepartment!!!!!!','2017-08-15 16:49:39','2017-08-15 16:49:39'),(12067,1,12103,'Aaab4','13899892315','\0(\0\0\0\0\0\0	\0#\0\03\0\0C\0\0S\0noteemailtitlecompanyid_numberdepartment!!!!!!','2017-08-15 16:49:40','2017-08-15 16:49:40'),(12068,1,12104,'Aaaa5','13899892316','\0(\0\0\0\0\03\0	\0c\0\0�\0\0\�\0\0�\0noteemailtitlecompanyid_numberdepartment!dd!dd!ddd!jjj!!ddd','2017-08-15 16:49:40','2017-08-25 15:06:45'),(12069,1,12105,'Aaaa2','13899892317','\0(\0\0\0\0\0\0	\0#\0\03\0\0C\0\0S\0noteemailtitlecompanyid_numberdepartment!!!!!!','2017-08-15 17:01:07','2017-08-15 17:01:07'),(12070,1,12106,'Aaab3','13899892318','\0(\0\0\0\0\0\0	\0#\0\03\0\0C\0\0S\0noteemailtitlecompanyid_numberdepartment!!!!!!','2017-08-15 17:01:07','2017-08-15 17:01:07'),(12074,1,12110,'Sala','13788839992','\0>\0\0\0\0\03\0	\0s\0\0�\0\0�\0#\030\0Cnotetitlecompanyid_numberdepartmentid_back_imageid_front_image!rr!333!111!444!222!!','2017-08-21 13:45:53','2017-08-21 13:45:53'),(12075,1,12111,'Siel','13822223333','\0>\0\0\0\0\03\0	\0s\0\0�\0\0�\0#\030\0Cnotetitlecompanyid_numberdepartmentid_back_imageid_front_image!66!444!222!555!333!!','2017-08-21 13:51:29','2017-08-21 13:51:29'),(12076,1,12112,'Sprlk','13099988882','\0>\0\0\0\0\03\0	\0c\0\0�\0\0\�\0#\0�\00\0\�notetitlecompanyid_numberdepartmentid_back_imageid_front_image!53!33!11!44!22!http://or7x902xd.bkt.clouddn.com/FtOT_4YU81AiawNmI9if1REf6wZY!http://or7x902xd.bkt.clouddn.com/Fh39AY11XIssnd1dURW_Uy5siKK5','2017-08-21 13:52:30','2017-08-21 14:39:56'),(12077,1,12113,'Uod','13922232223','\0>\0\0\0\0\0\0	\0#\0\03\0\0C\0#\0S\00\03notetitlecompanyid_numberdepartmentid_back_imageid_front_image!!!!!!http://or7x902xd.bkt.clouddn.com/Fh39AY11XIssnd1dURW_Uy5siKK5!http://or7x902xd.bkt.clouddn.com/FtOT_4YU81AiawNmI9if1REf6wZY','2017-08-21 14:58:01','2017-08-21 14:58:15'),(12078,1,12114,'阿拉善','18824333321','\0>\0\0\0\0\0s\0	\0\�\0\0S\0�#\030\0Cnoteemailcompanyid_numberdepartmentid_back_imageid_front_image!备注!d d d !么不!对对对!的!!','2017-08-24 15:48:23','2017-08-24 15:48:23'),(12080,1,12115,'123','13410238488',NULL,'2017-08-25 10:36:39','2017-08-25 10:36:39'),(12081,1,12116,'828','13410235555','\0\0\0\0\0\0\0	\0#\0\03\0\0C\0noteemailtitlecompanydepartment!!!!!','2017-08-28 14:52:10','2017-08-28 14:52:10'),(12084,1,12119,'李小姐','18925153756','\0\0\0\0\0\0\0	\0#\0\03\0\0C\0noteemailtitlecompanydepartment!!!!!','2017-09-01 10:26:16','2017-09-01 10:26:16'),(12085,1,12120,'李小姐','18925153756','\0\0\0\0\0\0\0	\0#\0\03\0\0C\0noteemailtitlecompanydepartment!!!!!','2017-09-01 10:32:40','2017-09-01 10:32:40'),(12086,1,12121,'18925153757','18925153757','\0\0\0\0\0\0\0	\0#\0\03\0\0C\0noteemailtitlecompanydepartment!!!!!','2017-09-01 10:40:13','2017-09-01 10:40:13'),(12087,1,12122,'18925153758','18925153758','\0\0\0\0\0\0\0companydepartment!!','2017-09-01 15:24:38','2017-09-01 15:24:38'),(12088,1674191091,12123,'213','13344443333',NULL,'2017-09-01 15:33:38','2017-09-01 15:33:38'),(12089,1674191091,12120,'李测试','18925153756',NULL,'2017-09-04 10:59:01','2017-09-04 10:59:01'),(12093,1132897105,12117,'DJMC','13410239969','\0(\0\0\0\0\0\�\0	\0C\0�\0\�\0�noteemailtitlecompanyid_numberdepartment!测试ddddd!163.com!only!siov!123dadjfajfk!DEV','2017-09-04 15:44:47','2017-09-06 17:41:24'),(12095,1132897105,12128,'2','13410239988','\0(\0\0\0\0\0#\0	\0C\0\0c\0\0�\0\0�\0noteemailtitlecompanyid_numberdepartment!3!3!2!1!3!1','2017-09-04 15:46:56','2017-09-04 15:46:56'),(12096,1132897105,12129,'8','13410235566','\0C\0\0\0\0\0#\0	\0C\0\0c\0\0�\0\0�\0(\0\�\05\0�noteemailtitlecompanyid_numberdepartmentid_back_imageid_front_image!8!8!8!8!88!8!http://or7x902xd.bkt.clouddn.com/FpOkxXlRhS0qxS71mXCl-b7iTeaI!http://or7x902xd.bkt.clouddn.com/FpOkxXlRhS0qxS71mXCl-b7iTeaI','2017-09-04 15:48:55','2017-09-04 15:48:55'),(12097,1146852709,12130,'麻瓜','13212444229','\0(\0\0\0\0\0s\0	\0#\0c\0�\0#noteemailtitlecompanyid_numberdepartment!么啊!xxx@xx.com!Eng!SIOV!123455!DEV','2017-09-04 16:19:03','2017-09-04 16:19:03'),(12098,1132897105,12131,'18925152233','18925152233','\0-\0\0\0\0\0\0	\03\0\0S\0\0c\0noteemailid_numberid_back_imageid_front_image!!1!1!!','2017-09-05 09:05:09','2017-09-05 09:05:09'),(12099,1535741440,12132,'95测试123','18925154444','\0C\0\0\0\0\0C\0	\0\�\0\0s\0\0S(\0�5\0\�noteemailtitlecompanyid_numberdepartmentid_back_imageid_front_image!123!邮箱123!12356666!公司123!123!部门123!http://or7x902xd.bkt.clouddn.com/FpOkxXlRhS0qxS71mXCl-b7iTeaI!http://or7x902xd.bkt.clouddn.com/FpOkxXlRhS0qxS71mXCl-b7iTeaI','2017-09-05 13:36:44','2017-09-05 16:43:16'),(12104,1535741440,12134,'2200','13510236666','\0(\0\0\0\0\0\0	\0#\0\03\0\0C\0\0S\0noteemailtitlecompanyid_numberdepartment!!!!!!','2017-09-05 14:23:04','2017-09-05 14:23:04'),(12105,1535741440,12135,'2201','18725151111','\0(\0\0\0\0\0\0	\0#\0\03\0\0C\0\0S\0noteemailtitlecompanyid_numberdepartment!!!!!!','2017-09-05 14:23:04','2017-09-05 14:23:04'),(12106,1535741440,12136,'李后果','18725156789','\0(\0\0\0\0\03\0	\0c\0\0�\0\0\03noteemailtitlecompanyid_numberdepartment!dd!dd!Test!SIOV!dd!DEV','2017-09-05 14:23:04','2017-09-05 16:46:37'),(12107,1410277206,12137,'96用户11','18925153744','\0C\0\0\0\0\03\0	\0c\0\0�\0\0\�\0\0�\0(\0#5\0noteemailtitlecompanyid_numberdepartmentid_back_imageid_front_image!55!33!66!11!44!22!http://or7x902xd.bkt.clouddn.com/FpOkxXlRhS0qxS71mXCl-b7iTeaI!http://or7x902xd.bkt.clouddn.com/FpOkxXlRhS0qxS71mXCl-b7iTeaI','2017-09-06 16:09:27','2017-09-06 16:13:32'),(12108,1146852709,12141,'大家阿里风景','13212444228',NULL,'2017-09-07 10:28:25','2017-09-07 10:28:25'),(12109,1410277206,12127,'97','13410239999','\01\0\0\0\0\0#\0\0C\0\0c\0#\0s\0titlecompanydepartmentid_back_imageid_front_image!3!1!2!!','2017-09-07 10:35:54','2017-09-07 10:35:54'),(12110,1410277206,12146,'974','13410238888','\01\0\0\0\0\0#\0\0C\0\0c\0#\0Ctitlecompanydepartmentid_back_imageid_front_image!3!1!2!http://or7x902xd.bkt.clouddn.com/FpOkxXlRhS0qxS71mXCl-b7iTeaI!http://or7x902xd.bkt.clouddn.com/FpOkxXlRhS0qxS71mXCl-b7iTeaI','2017-09-07 10:36:32','2017-09-07 10:36:32'),(12111,1146852709,12148,'怎么来的','13410236666',NULL,'2017-09-07 10:56:59','2017-09-07 10:56:59'),(12112,1101310510,12149,'97973','13410297973','\0\0\0\0\0company!1','2017-09-07 15:37:39','2017-09-07 15:38:21'),(12113,1101310510,12150,'97972','13410297972','\0\0\0\0\0company!','2017-09-07 15:37:50','2017-09-07 15:37:50'),(12114,1122327156,12151,'大名鼎鼎','13899996666',NULL,'2017-09-07 17:01:18','2017-09-07 17:01:18'),(12115,1122327156,12152,'大法','13888882222',NULL,'2017-09-07 17:25:21','2017-09-07 17:25:21');
+INSERT INTO `bd_account_profile` VALUES (12000,1,12000,'阿斯蒂芬','13322223333','\0C\0\0\0\0\0?\0	\0?\0\0#\0?\0?(\035\0noteemailtitlecompanyid_numberdepartmentid_back_imageid_front_image!教导处!!经理!siov1!!人事部!http://or7x902xd.bkt.clouddn.com/FmmoRJooQn6b4FM36zXps6_dpAvi!http://or7x902xd.bkt.clouddn.com/FmmoRJooQn6b4FM36zXps6_dpAvi','2017-07-28 15:18:20','2017-08-23 09:11:16'),(12001,1,12001,'老大哥','13399998888','\0\0\0\0\0\03\0\0\?\0notecompanydepartment!12!点对点!单独','2017-07-28 17:48:38','2017-08-01 11:10:59'),(12002,1,12004,'奥德赛','13233334444','\0\0\0\0\0\0#\0\0C\0notecompanydepartment!2!2!2','2017-07-31 10:19:18','2017-08-01 11:24:09'),(12003,1,12005,'张里','13333333333','\0\0\0\0\0\0#\0\0C\0notecompanydepartment!3!1!2dd','2017-07-31 10:20:18','2017-08-01 14:00:28'),(12005,12,12013,'Wong','13612444229',NULL,'2017-08-01 10:05:45','2017-08-01 10:05:45'),(12021,1,12027,'Duel','13722232223','\0#\0\0\0\0\0\0\0#\0\03\0notecompanydepartmentid_front_image!!!!1','2017-08-01 14:43:56','2017-08-01 14:43:56'),(12025,1,12031,'Peif','13888888888','\0C\0\0\0\0\0C\0	\0?\0\0\?\0\03\0s(\0?5\0noteemailtitlecompanyid_numberdepartmentid_back_imageid_front_image!ddd!wwww!engi!SIOV!ddd!develop!!','2017-08-04 10:13:26','2017-08-10 10:31:43'),(12026,1,12032,'Ysfe','13688875468','\0C\0\0\0\0\0\0	\0#\0\03\0\0C\0\0S\0(\0c\05\0s\0noteemailtitlecompanyid_numberdepartmentid_back_imageid_front_image!!!!!!!!','2017-08-04 10:13:47','2017-08-31 15:04:54'),(12027,1,12033,'Ysfe','13688875123','\05\0\0\0\0\0\0\0#\0\Z\03\0\'\0C\0companyid_numberdepartmentid_back_imageid_front_image!!!!!','2017-08-04 10:13:53','2017-08-04 10:13:53'),(12028,1,12034,'Vrad','13688871234','\05\0\0\0\0\0\0\0#\0\Z\03\0\'\0C\0companyid_numberdepartmentid_back_imageid_front_image!!!!!','2017-08-04 10:14:20','2017-08-04 10:14:20'),(12029,1,12035,'Vab','13688871233','\05\0\0\0\0\0\0\0#\0\Z\03\0\'\0C\0companyid_numberdepartmentid_back_imageid_front_image!!!!!','2017-08-04 10:14:29','2017-08-04 10:14:29'),(12030,1,12036,'Vab','13683871233','\05\0\0\0\0\0\0\0#\0\Z\03\0\'\0C\0companyid_numberdepartmentid_back_imageid_front_image!!!!!','2017-08-04 10:14:36','2017-08-04 10:14:36'),(12031,1,12037,'Vaba','13383871233','\05\0\0\0\0\0\0\0#\0\Z\03\0\'\0C\0companyid_numberdepartmentid_back_imageid_front_image!!!!!','2017-08-04 10:14:44','2017-08-04 10:14:44'),(12032,1,12038,'Vaba','13383871238','\05\0\0\0\0\0\0\0#\0\Z\03\0\'\0C\0companyid_numberdepartmentid_back_imageid_front_image!!!!!','2017-08-04 10:14:48','2017-08-04 10:14:48'),(12033,1,12039,'Vaba','13383871638','\05\0\0\0\0\0\0\0#\0\Z\03\0\'\0C\0companyid_numberdepartmentid_back_imageid_front_image!!!!!','2017-08-04 10:14:51','2017-08-04 10:14:51'),(12035,1,12041,'Vaba','13385871678','\05\0\0\0\0\0\0\0#\0\Z\03\0\'\0C\0companyid_numberdepartmentid_back_imageid_front_image!!!!!','2017-08-04 10:14:55','2017-08-04 10:14:55'),(12036,1,12042,'Vaba','13385771678','\05\0\0\0\0\0\0\0#\0\Z\03\0\'\0C\0companyid_numberdepartmentid_back_imageid_front_image!!!!!','2017-08-04 10:14:58','2017-08-04 10:14:58'),(12037,1,12043,'Vaba','13385771878','\05\0\0\0\0\0\0\0#\0\Z\03\0\'\0C\0companyid_numberdepartmentid_back_imageid_front_image!!!!!','2017-08-04 10:15:01','2017-08-04 10:15:01'),(12038,1,12044,'Vaba','13389771878','\05\0\0\0\0\0\0\0#\0\Z\03\0\'\0C\0companyid_numberdepartmentid_back_imageid_front_image!!!!!','2017-08-04 10:15:04','2017-08-04 10:15:04'),(12039,1,12045,'Vaba','13389771578','\05\0\0\0\0\0\0\0#\0\Z\03\0\'\0C\0companyid_numberdepartmentid_back_imageid_front_image!!!!!','2017-08-04 10:15:06','2017-08-04 10:15:06'),(12042,1,12048,'Vaba','13380071570','\05\0\0\0\0\0\0\0#\0\Z\03\0\'\0C\0companyid_numberdepartmentid_back_imageid_front_image!!!!!','2017-08-04 10:15:19','2017-08-04 10:15:19'),(12043,1,12049,'Vaba','13380001570','\05\0\0\0\0\0\0\0#\0\Z\03\0\'\0C\0companyid_numberdepartmentid_back_imageid_front_image!!!!!','2017-08-04 10:15:21','2017-08-04 10:15:21'),(12044,1,12050,'Vaba','13380000570','\05\0\0\0\0\0\0\0#\0\Z\03\0\'\0C\0companyid_numberdepartmentid_back_imageid_front_image!!!!!','2017-08-04 10:15:23','2017-08-04 10:15:23'),(12045,1,12051,'Vaba','13380000070','\05\0\0\0\0\0\0\0#\0\Z\03\0\'\0C\0companyid_numberdepartmentid_back_imageid_front_image!!!!!','2017-08-04 10:15:26','2017-08-04 10:15:26'),(12046,1,12052,'Vaba','13380000000','\05\0\0\0\0\0\0\0#\0\Z\03\0\'\0C\0companyid_numberdepartmentid_back_imageid_front_image!!!!!','2017-08-04 10:15:28','2017-08-04 10:15:28'),(12047,1,12053,'Vaba','13380000001','\05\0\0\0\0\0\0\0#\0\Z\03\0\'\0C\0companyid_numberdepartmentid_back_imageid_front_image!!!!!','2017-08-04 10:15:33','2017-08-04 10:15:33'),(12048,1,12054,'Vaba','13380002001','\05\0\0\0\0\0\0\0#\0\Z\03\0\'\0C\0companyid_numberdepartmentid_back_imageid_front_image!!!!!','2017-08-04 10:15:40','2017-08-04 10:15:40'),(12049,1,12055,'Vaba','13380002201','\05\0\0\0\0\0\0\0#\0\Z\03\0\'\0C\0companyid_numberdepartmentid_back_imageid_front_image!!!!!','2017-08-04 10:15:46','2017-08-04 10:15:46'),(12050,1,12056,'Vaba','13381002201','\05\0\0\0\0\0\0\0#\0\Z\03\0\'\0C\0companyid_numberdepartmentid_back_imageid_front_image!!!!!','2017-08-04 10:15:50','2017-08-04 10:15:50'),(12051,1,12057,'Vaba','13381102201','\05\0\0\0\0\0\0\0#\0\Z\03\0\'\0C\0companyid_numberdepartmentid_back_imageid_front_image!!!!!','2017-08-04 10:15:54','2017-08-04 10:15:54'),(12052,1,12058,'Vaba','13381112201','\05\0\0\0\0\0\0\0#\0\Z\03\0\'\0C\0companyid_numberdepartmentid_back_imageid_front_image!!!!!','2017-08-04 10:15:56','2017-08-04 10:15:56'),(12053,1,12059,'Vaba','13381111201','\05\0\0\0\0\0\0\0#\0\Z\03\0\'\0C\0companyid_numberdepartmentid_back_imageid_front_image!!!!!','2017-08-04 10:15:59','2017-08-04 10:15:59'),(12054,1,12060,'Vaba','13381111101','\05\0\0\0\0\0\0\0#\0\Z\03\0\'\0C\0companyid_numberdepartmentid_back_imageid_front_image!!!!!','2017-08-04 10:16:02','2017-08-04 10:16:02'),(12055,1,12061,'Vaba','13381111111','\05\0\0\0\0\0\0\0#\0\Z\03\0\'\0C\0companyid_numberdepartmentid_back_imageid_front_image!!!!!','2017-08-04 10:16:04','2017-08-04 10:16:04'),(12056,1,12062,'Vaba','13382111111','\05\0\0\0\0\0\0\0#\0\Z\03\0\'\0C\0companyid_numberdepartmentid_back_imageid_front_image!!!!!','2017-08-04 10:16:07','2017-08-04 10:16:07'),(12057,1,12063,'Vaba','13382211111','\05\0\0\0\0\0\0\0#\0\Z\03\0\'\0C\0companyid_numberdepartmentid_back_imageid_front_image!!!!!','2017-08-04 10:16:09','2017-08-04 10:16:09'),(12058,1,12064,'Vaba','13382221111','\05\0\0\0\0\0\0\0#\0\Z\03\0\'\0C\0companyid_numberdepartmentid_back_imageid_front_image!!!!!','2017-08-04 10:16:13','2017-08-04 10:16:13'),(12059,1,12065,'黄丽的','18825111149','\0(\0\0\0\0\0c\0	\0\?\0\0S\0?\0?noteemailtitlecompanyid_numberdepartment!22222!xxx.xxx!扫地!SIOV!2222!研发','2017-08-09 16:03:33','2017-08-09 16:03:33'),(12060,1,12066,'Psa','18898986565','\0(\0\0\0\0\0\0	\0#\0\03\0\0C\0\0S\0noteemailtitlecompanyid_numberdepartment!!!!!!','2017-08-10 16:03:28','2017-08-10 16:03:28'),(12061,1,12067,'Piso','13900908888','\0(\0\0\0\0\0\0	\0#\0\03\0\0C\0\0S\0noteemailtitlecompanyid_numberdepartment!!!!!!','2017-08-10 16:04:12','2017-08-10 16:04:12'),(12062,1,12098,'Imp1','13800138656','\0(\0\0\0\0\0\0	\0?\0\0\?\0\0\0#noteemailtitlecompanyid_numberdepartment!!sa@sa.com!sa!sa!!sa','2017-08-15 16:22:43','2017-08-15 16:22:43'),(12063,1,12099,'Imp2','13200138656','\0(\0\0\0\0\0\0	\0?\0\0\?\0\0\0#noteemailtitlecompanyid_numberdepartment!!sa@sa.com!sa!sa!!sa','2017-08-15 16:41:15','2017-08-15 16:41:15'),(12064,1,12100,'Aaaa1','13899892312','\0(\0\0\0\0\0\0	\0#\0\03\0\0C\0\0S\0noteemailtitlecompanyid_numberdepartment!!!!!!','2017-08-15 16:49:39','2017-08-15 16:49:39'),(12065,1,12101,'Aaab2','13899892313','\0(\0\0\0\0\0\0	\0#\0\03\0\0C\0\0S\0noteemailtitlecompanyid_numberdepartment!!!!!!','2017-08-15 16:49:39','2017-08-15 16:49:39'),(12066,1,12102,'Aaaa3','13899892314','\0(\0\0\0\0\0\0	\0#\0\03\0\0C\0\0S\0noteemailtitlecompanyid_numberdepartment!!!!!!','2017-08-15 16:49:39','2017-08-15 16:49:39'),(12067,1,12103,'Aaab4','13899892315','\0(\0\0\0\0\0\0	\0#\0\03\0\0C\0\0S\0noteemailtitlecompanyid_numberdepartment!!!!!!','2017-08-15 16:49:40','2017-08-15 16:49:40'),(12068,1,12104,'Aaaa5','13899892316','\0(\0\0\0\0\03\0	\0c\0\0?\0\0\?\0\0?\0noteemailtitlecompanyid_numberdepartment!dd!dd!ddd!jjj!!ddd','2017-08-15 16:49:40','2017-08-25 15:06:45'),(12069,1,12105,'Aaaa2','13899892317','\0(\0\0\0\0\0\0	\0#\0\03\0\0C\0\0S\0noteemailtitlecompanyid_numberdepartment!!!!!!','2017-08-15 17:01:07','2017-08-15 17:01:07'),(12070,1,12106,'Aaab3','13899892318','\0(\0\0\0\0\0\0	\0#\0\03\0\0C\0\0S\0noteemailtitlecompanyid_numberdepartment!!!!!!','2017-08-15 17:01:07','2017-08-15 17:01:07'),(12074,1,12110,'Sala','13788839992','\0>\0\0\0\0\03\0	\0s\0\0?\0\0?\0#\030\0Cnotetitlecompanyid_numberdepartmentid_back_imageid_front_image!rr!333!111!444!222!!','2017-08-21 13:45:53','2017-08-21 13:45:53'),(12075,1,12111,'Siel','13822223333','\0>\0\0\0\0\03\0	\0s\0\0?\0\0?\0#\030\0Cnotetitlecompanyid_numberdepartmentid_back_imageid_front_image!66!444!222!555!333!!','2017-08-21 13:51:29','2017-08-21 13:51:29'),(12076,1,12112,'Sprlk','13099988882','\0>\0\0\0\0\03\0	\0c\0\0?\0\0\?\0#\0?\00\0\?notetitlecompanyid_numberdepartmentid_back_imageid_front_image!53!33!11!44!22!http://or7x902xd.bkt.clouddn.com/FtOT_4YU81AiawNmI9if1REf6wZY!http://or7x902xd.bkt.clouddn.com/Fh39AY11XIssnd1dURW_Uy5siKK5','2017-08-21 13:52:30','2017-08-21 14:39:56'),(12077,1,12113,'Uod','13922232223','\0>\0\0\0\0\0\0	\0#\0\03\0\0C\0#\0S\00\03notetitlecompanyid_numberdepartmentid_back_imageid_front_image!!!!!!http://or7x902xd.bkt.clouddn.com/Fh39AY11XIssnd1dURW_Uy5siKK5!http://or7x902xd.bkt.clouddn.com/FtOT_4YU81AiawNmI9if1REf6wZY','2017-08-21 14:58:01','2017-08-21 14:58:15'),(12078,1,12114,'阿拉善','18824333321','\0>\0\0\0\0\0s\0	\0\?\0\0S\0?#\030\0Cnoteemailcompanyid_numberdepartmentid_back_imageid_front_image!备注!d d d !么不!对对对!的!!','2017-08-24 15:48:23','2017-08-24 15:48:23'),(12080,1,12115,'123','13410238488',NULL,'2017-08-25 10:36:39','2017-08-25 10:36:39'),(12081,1,12116,'828','13410235555','\0\0\0\0\0\0\0	\0#\0\03\0\0C\0noteemailtitlecompanydepartment!!!!!','2017-08-28 14:52:10','2017-08-28 14:52:10'),(12084,1,12119,'李小姐','18925153756','\0\0\0\0\0\0\0	\0#\0\03\0\0C\0noteemailtitlecompanydepartment!!!!!','2017-09-01 10:26:16','2017-09-01 10:26:16'),(12085,1,12120,'李小姐','18925153756','\0\0\0\0\0\0\0	\0#\0\03\0\0C\0noteemailtitlecompanydepartment!!!!!','2017-09-01 10:32:40','2017-09-01 10:32:40'),(12086,1,12121,'18925153757','18925153757','\0\0\0\0\0\0\0	\0#\0\03\0\0C\0noteemailtitlecompanydepartment!!!!!','2017-09-01 10:40:13','2017-09-01 10:40:13'),(12087,1,12122,'18925153758','18925153758','\0\0\0\0\0\0\0companydepartment!!','2017-09-01 15:24:38','2017-09-01 15:24:38'),(12088,1674191091,12123,'213','13344443333',NULL,'2017-09-01 15:33:38','2017-09-01 15:33:38'),(12089,1674191091,12120,'李测试','18925153756',NULL,'2017-09-04 10:59:01','2017-09-04 10:59:01'),(12093,1132897105,12117,'DJMC','13410239969','\0(\0\0\0\0\0\?\0	\0C\0?\0\?\0?noteemailtitlecompanyid_numberdepartment!测试ddddd!163.com!only!siov!123dadjfajfk!DEV','2017-09-04 15:44:47','2017-09-06 17:41:24'),(12095,1132897105,12128,'2','13410239988','\0(\0\0\0\0\0#\0	\0C\0\0c\0\0?\0\0?\0noteemailtitlecompanyid_numberdepartment!3!3!2!1!3!1','2017-09-04 15:46:56','2017-09-04 15:46:56'),(12096,1132897105,12129,'8','13410235566','\0C\0\0\0\0\0#\0	\0C\0\0c\0\0?\0\0?\0(\0\?\05\0?noteemailtitlecompanyid_numberdepartmentid_back_imageid_front_image!8!8!8!8!88!8!http://or7x902xd.bkt.clouddn.com/FpOkxXlRhS0qxS71mXCl-b7iTeaI!http://or7x902xd.bkt.clouddn.com/FpOkxXlRhS0qxS71mXCl-b7iTeaI','2017-09-04 15:48:55','2017-09-04 15:48:55'),(12097,1146852709,12130,'麻瓜','13212444229','\0(\0\0\0\0\0s\0	\0#\0c\0?\0#noteemailtitlecompanyid_numberdepartment!么啊!xxx@xx.com!Eng!SIOV!123455!DEV','2017-09-04 16:19:03','2017-09-04 16:19:03'),(12098,1132897105,12131,'18925152233','18925152233','\0-\0\0\0\0\0\0	\03\0\0S\0\0c\0noteemailid_numberid_back_imageid_front_image!!1!1!!','2017-09-05 09:05:09','2017-09-05 09:05:09'),(12099,1535741440,12132,'95测试123','18925154444','\0C\0\0\0\0\0C\0	\0\?\0\0s\0\0S(\0?5\0\?noteemailtitlecompanyid_numberdepartmentid_back_imageid_front_image!123!邮箱123!12356666!公司123!123!部门123!http://or7x902xd.bkt.clouddn.com/FpOkxXlRhS0qxS71mXCl-b7iTeaI!http://or7x902xd.bkt.clouddn.com/FpOkxXlRhS0qxS71mXCl-b7iTeaI','2017-09-05 13:36:44','2017-09-05 16:43:16'),(12104,1535741440,12134,'2200','13510236666','\0(\0\0\0\0\0\0	\0#\0\03\0\0C\0\0S\0noteemailtitlecompanyid_numberdepartment!!!!!!','2017-09-05 14:23:04','2017-09-05 14:23:04'),(12105,1535741440,12135,'2201','18725151111','\0(\0\0\0\0\0\0	\0#\0\03\0\0C\0\0S\0noteemailtitlecompanyid_numberdepartment!!!!!!','2017-09-05 14:23:04','2017-09-05 14:23:04'),(12106,1535741440,12136,'李后果','18725156789','\0(\0\0\0\0\03\0	\0c\0\0?\0\0\03noteemailtitlecompanyid_numberdepartment!dd!dd!Test!SIOV!dd!DEV','2017-09-05 14:23:04','2017-09-05 16:46:37'),(12107,1410277206,12137,'96用户11','18925153744','\0C\0\0\0\0\03\0	\0c\0\0?\0\0\?\0\0?\0(\0#5\0noteemailtitlecompanyid_numberdepartmentid_back_imageid_front_image!55!33!66!11!44!22!http://or7x902xd.bkt.clouddn.com/FpOkxXlRhS0qxS71mXCl-b7iTeaI!http://or7x902xd.bkt.clouddn.com/FpOkxXlRhS0qxS71mXCl-b7iTeaI','2017-09-06 16:09:27','2017-09-06 16:13:32'),(12108,1146852709,12141,'大家阿里风景','13212444228',NULL,'2017-09-07 10:28:25','2017-09-07 10:28:25'),(12109,1410277206,12127,'97','13410239999','\01\0\0\0\0\0#\0\0C\0\0c\0#\0s\0titlecompanydepartmentid_back_imageid_front_image!3!1!2!!','2017-09-07 10:35:54','2017-09-07 10:35:54'),(12110,1410277206,12146,'974','13410238888','\01\0\0\0\0\0#\0\0C\0\0c\0#\0Ctitlecompanydepartmentid_back_imageid_front_image!3!1!2!http://or7x902xd.bkt.clouddn.com/FpOkxXlRhS0qxS71mXCl-b7iTeaI!http://or7x902xd.bkt.clouddn.com/FpOkxXlRhS0qxS71mXCl-b7iTeaI','2017-09-07 10:36:32','2017-09-07 10:36:32'),(12111,1146852709,12148,'怎么来的','13410236666',NULL,'2017-09-07 10:56:59','2017-09-07 10:56:59'),(12112,1101310510,12149,'97973','13410297973','\0\0\0\0\0company!1','2017-09-07 15:37:39','2017-09-07 15:38:21'),(12113,1101310510,12150,'97972','13410297972','\0\0\0\0\0company!','2017-09-07 15:37:50','2017-09-07 15:37:50'),(12114,1122327156,12151,'大名鼎鼎','13899996666',NULL,'2017-09-07 17:01:18','2017-09-07 17:01:18'),(12115,1122327156,12152,'大法','13888882222',NULL,'2017-09-07 17:25:21','2017-09-07 17:25:21');
 /*!40000 ALTER TABLE `bd_account_profile` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -280,8 +280,8 @@ CREATE TABLE `bd_ap` (
   `mpoi_id` int(11) DEFAULT NULL COMMENT '地址位置信息字段',
   `connections` int(11) DEFAULT '0' COMMENT '在线人数',
   `model` varchar(32) DEFAULT NULL COMMENT 'ap型号',
-  `created_at` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-  `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
+  `created_at` datetime COMMENT '创建时间',
+  `updated_at` datetime  COMMENT '修改时间',
   `is_sens` tinyint(3) unsigned NOT NULL DEFAULT '0' COMMENT '0-关闭感知/1-开启感知',
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_ap_mac` (`mac`)
@@ -338,8 +338,8 @@ CREATE TABLE `bd_api_token` (
   `access_token` varchar(128) NOT NULL COMMENT 'access_token',
   `note` varchar(128) NOT NULL COMMENT '备注',
   `mask` int(11) unsigned NOT NULL DEFAULT '0' COMMENT 'token标志位, mask & 1 > 0禁用',
-  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  `created_at` datetime COMMENT '创建时间',
+  `updated_at` datetime COMMENT '更新时间',
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_portal_pn_name` (`secret_key`,`access_token`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
@@ -393,7 +393,7 @@ CREATE TABLE `bd_coupon_serial` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `created_by` int(11) NOT NULL COMMENT '生成兑换码管理员ID',
   `serial` int(11) NOT NULL COMMENT '兑换码序列号',
-  `created_at` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '生成时间',
+  `created_at` datetime  COMMENT '生成时间',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -419,7 +419,7 @@ CREATE TABLE `bd_coupon_used_record` (
   `code` varchar(32) NOT NULL COMMENT '兑换码',
   `account_id` int(11) NOT NULL COMMENT '兑换用户id',
   `hours` smallint(6) NOT NULL COMMENT '兑换时长',
-  `created_at` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '兑换时间',
+  `created_at` datetime COMMENT '兑换时间',
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_redeem_record_user_code` (`account_id`,`code`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
@@ -445,7 +445,7 @@ CREATE TABLE `bd_dyncol` (
   `id` int(10) NOT NULL AUTO_INCREMENT,
   `col` varchar(32) NOT NULL COMMENT '字段名',
   `label` varchar(32) NOT NULL COMMENT '属性名',
-  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `created_at` datetime  COMMENT '创建时间',
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_dyncol_col_label` (`col`,`label`)
 ) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8;
@@ -474,7 +474,7 @@ CREATE TABLE `bd_letter` (
   `content` text NOT NULL COMMENT '通知内容',
   `status` smallint(5) unsigned NOT NULL COMMENT '状态标示, 0 - 草稿, 1 - 发布, 2 - 删除',
   `created_by` int(11) NOT NULL COMMENT '创建平台管理员id',
-  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `created_at` datetime COMMENT '创建时间',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=84 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -500,9 +500,9 @@ CREATE TABLE `bd_mac_history` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `user` varchar(32) NOT NULL COMMENT '关联的bd_account.user字段',
   `mac` char(17) NOT NULL DEFAULT '' COMMENT '用户设备mac地址',
-  `tlogin` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '上网终端绑定时间',
+  `tlogin` datetime COMMENT '上网终端绑定时间',
   `platform` varchar(256) NOT NULL DEFAULT '' COMMENT '上网设备，User-Agent判断',
-  `expired` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '自动认证过期时间',
+  `expired` datetime  COMMENT '自动认证过期时间',
   `ssid` varchar(32) NOT NULL DEFAULT '' COMMENT 'AC ssid',
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_user_mac_ssid` (`user`,`mac`,`ssid`),
@@ -534,7 +534,7 @@ CREATE TABLE `bd_mailbox` (
   `content` text COMMENT '通知内容',
   `is_broadcast` smallint(5) unsigned NOT NULL DEFAULT '1' COMMENT '是否广播信息, 0 - 不是, 1 - 是',
   `status` smallint(5) unsigned NOT NULL COMMENT '状态标示, 0 - 未读, 1 - 已读, 2 - 删除',
-  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `created_at` datetime COMMENT '创建时间',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=224 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -567,8 +567,8 @@ CREATE TABLE `bd_network_config` (
   `wechat_account_id` int(11) DEFAULT NULL COMMENT '微信认证上网公众账号, 仅当 mask & 2 > 0时使用',
   `duration` int(11) NOT NULL DEFAULT '30' COMMENT '自动认证间隔时间，默认为30天',
   `session_timeout` int(11) NOT NULL DEFAULT '24' COMMENT '一次认证，授权时间（小时)',
-  `created_at` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '兑换时间',
-  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  `created_at` datetime  COMMENT '兑换时间',
+  `updated_at` datetime  COMMENT '更新时间',
   PRIMARY KEY (`id`),
   UNIQUE KEY `pn_network_config_pn_ssid` (`pn`,`ssid`)
 ) ENGINE=InnoDB AUTO_INCREMENT=26 DEFAULT CHARSET=utf8;
@@ -596,7 +596,7 @@ CREATE TABLE `bd_online` (
   `user` varchar(32) NOT NULL DEFAULT '' COMMENT '用户上网账号, 关联bd_account.user',
   `nas_addr` varchar(32) NOT NULL DEFAULT '' COMMENT 'AC或认证网关ip地址',
   `acct_session_id` varchar(64) NOT NULL DEFAULT '' COMMENT '会话id, radius查找在线设备依据',
-  `acct_start_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '上网起始时间',
+  `acct_start_time` datetime COMMENT '上网起始时间',
   `framed_ipaddr` varchar(32) NOT NULL DEFAULT '' COMMENT '终端获得的ip地址',
   `mac_addr` varchar(24) NOT NULL DEFAULT '' COMMENT '终端的mac地址',
   `billing_times` int(11) NOT NULL DEFAULT '0' COMMENT '计费时长',
@@ -643,8 +643,8 @@ CREATE TABLE `bd_package` (
   `mask` int(11) NOT NULL COMMENT 'mask & 1 == 1 按小时收费;mask & 1 = 0 按天收费',
   `is_deleted` smallint(6) NOT NULL DEFAULT '0' COMMENT '是否删除, 0 - 否, 1 - 是',
   `apply_projects` varchar(256) NOT NULL DEFAULT '[]' COMMENT '投放项目id列表，空为全部项目',
-  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  `created_at` datetime COMMENT '创建时间',
+  `updated_at` datetime COMMENT '更新时间',
   PRIMARY KEY (`id`),
   KEY `idx_package_pn` (`name`,`pn`,`is_deleted`)
 ) ENGINE=InnoDB AUTO_INCREMENT=88 DEFAULT CHARSET=utf8;
@@ -674,7 +674,7 @@ CREATE TABLE `bd_package_order` (
   `amount` decimal(8,2) NOT NULL COMMENT '金额',
   `pay_with` varchar(32) NOT NULL COMMENT '支付方式, alipay or wechat',
   `pay_from` varchar(32) NOT NULL COMMENT '支付入口, APP or wechat',
-  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `created_at` datetime COMMENT '创建时间',
   PRIMARY KEY (`id`),
   KEY `fk_pack_order_account_id` (`account_id`),
   KEY `fk_pack_order_package_id` (`package_id`),
@@ -763,8 +763,8 @@ CREATE TABLE `bd_portal` (
   `pc_title` varchar(64) NOT NULL COMMENT 'PC 文案内容',
   `pc_banner_url` varchar(256) NOT NULL COMMENT 'PC 顶部banner图片链接',
   `on_using` smallint(6) NOT NULL DEFAULT '0' COMMENT '是否为默认模版, 仅对平台portal模版有意义',
-  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  `created_at` datetime COMMENT '创建时间',
+  `updated_at` datetime COMMENT '更新时间',
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_portal_pn_name` (`pn`,`name`)
 ) ENGINE=InnoDB AUTO_INCREMENT=32 DEFAULT CHARSET=utf8;
@@ -792,7 +792,7 @@ CREATE TABLE `bd_tag` (
   `tag_type` varchar(64) NOT NULL COMMENT '标签类型，user, pay_policy etc',
   `name` varchar(32) NOT NULL COMMENT '标签名',
   `pn` int(11) NOT NULL DEFAULT '0' COMMENT '所属项目,默认0为平台标签',
-  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `created_at` datetime COMMENT '创建时间',
   PRIMARY KEY (`id`),
   KEY `idx_pn_tagtype` (`pn`,`tag_type`)
 ) ENGINE=InnoDB AUTO_INCREMENT=99 DEFAULT CHARSET=utf8;
@@ -832,8 +832,8 @@ CREATE TABLE `bd_ticket` (
   `framed_ipaddr` varchar(24) NOT NULL DEFAULT '' COMMENT '用户ip地址',
   `start_source` smallint(6) NOT NULL DEFAULT '0',
   `stop_source` smallint(6) NOT NULL DEFAULT '0',
-  `acct_start_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '会话起始时间',
-  `acct_stop_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '会话结束时间',
+  `acct_start_time` datetime COMMENT '会话起始时间',
+  `acct_stop_time` datetime  COMMENT '会话结束时间',
   `pn` varchar(128) NOT NULL DEFAULT '' COMMENT '网络所属项目',
   PRIMARY KEY (`id`),
   KEY `idx_ticket_user` (`user`)
@@ -862,8 +862,8 @@ CREATE TABLE `bd_user` (
   `mask` int(11) unsigned NOT NULL COMMENT '账号标识',
   `value` varchar(128) NOT NULL COMMENT '存储与mask相关的信息字段',
   `note` varchar(256) NOT NULL COMMENT '若微信账号注册，则此字段为appid+tid, 否则为null',
-  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  `created_at` datetime COMMENT '创建时间',
+  `updated_at` datetime COMMENT '更新时间',
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_user_value` (`value`)
 ) ENGINE=InnoDB AUTO_INCREMENT=12000 DEFAULT CHARSET=utf8;
@@ -894,8 +894,8 @@ CREATE TABLE `bd_wechat_official_account` (
   `secret` varchar(64) NOT NULL COMMENT '公众号secret',
   `note` varchar(128) NOT NULL DEFAULT '' COMMENT '备注',
   `is_deleted` smallint(6) NOT NULL DEFAULT '0' COMMENT '是否删除',
-  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  `created_at` datetime COMMENT '创建时间',
+  `updated_at` datetime COMMENT '更新时间',
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_wx_appid` (`pn`,`appid`,`is_deleted`)
 ) ENGINE=InnoDB AUTO_INCREMENT=20 DEFAULT CHARSET=utf8mb4;
@@ -925,8 +925,8 @@ CREATE TABLE `bd_wechat_user` (
   `openid` varchar(64) NOT NULL COMMENT '用户openid',
   `mask` int(11) unsigned NOT NULL COMMENT '账号标识, mask & 1 > 0已关注公众号',
   `note` varchar(256) NOT NULL DEFAULT '' COMMENT '备注',
-  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  `created_at` datetime COMMENT '创建时间',
+  `updated_at` datetime COMMENT '更新时间',
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_wechat_user` (`account_id`,`appid`,`openid`)
 ) ENGINE=InnoDB AUTO_INCREMENT=12000 DEFAULT CHARSET=utf8;
@@ -1109,7 +1109,7 @@ CREATE TABLE `resources_registry` (
   `public_name` varchar(128) NOT NULL DEFAULT '' COMMENT '资源公有名称，要求全局唯一',
   `private_name` varchar(128) NOT NULL DEFAULT '' COMMENT '资源私有名称，用来拼接uri',
   `description` varchar(256) NOT NULL DEFAULT '0' COMMENT '资源的描述',
-  `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `update_time` datetime,
   `status` tinyint(1) NOT NULL DEFAULT '1' COMMENT '是否有效，1为是，0为否',
   `ascription` smallint(6) NOT NULL DEFAULT '0' COMMENT '资源归属, 0通用,1为platform的资源,2为client的资源',
   PRIMARY KEY (`id`),
