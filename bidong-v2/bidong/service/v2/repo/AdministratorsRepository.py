@@ -94,20 +94,24 @@ class AdministratorAuthsRepository(object):
             AdministratorsAuthorization.resource_name == resource.name,
             AdministratorsAuthorization.resource_locator == resource.locator,
         ).update(
-            authorization_holder=auth.holder,
-            holder_type=auth.holder_type,
-            resource_id=resource.id,
-            resource_name=resource.name,
-            resource_locator=resource.locator,
-            allow_method=auth.allow_method,
-            status=auth.status,
+            dict(
+                authorization_holder=auth.holder,
+                holder_type=auth.holder_type,
+                resource_id=resource.id,
+                resource_name=resource.name,
+                resource_locator=resource.locator,
+                allow_method=auth.allow_method,
+                status=auth.status),
             synchronize_session=False)
+        r = session.query(AdministratorsAuthorization).filter(
+            AdministratorsAuthorization.authorization_holder == auth.holder,
+            AdministratorsAuthorization.resource_name == resource.name,
+            AdministratorsAuthorization.resource_locator == resource.locator,
+        )
         return ObjectDict(dictize(r.one()))
 
 
 class AdministratorsAuthsQuery(BaseQuerySet):
-    DATA = ResourceRegistry.DATA
-    FEATURE = ResourceRegistry.FEATURE
 
     def __init__(self):
         self.r = None
@@ -195,16 +199,22 @@ class AdministratorOverviewsRepository(object):
 
     @staticmethod
     def _reset(entity):
-        r = session.query(Administrators).filter(
+        q = session.query(Administrators).filter(
             Administrators.id == entity.id,
-        ).update(
-            name=entity.name,
-            status=entity.status,
-            mobile=entity.mobile,
-            create_time=entity.create_time,
-            description=entity.description,
+        )
+        print(q)
+        r = q.update(
+            dict(name=entity.name,
+                 status=entity.status,
+                 mobile=entity.mobile,
+                 description=entity.description),
             synchronize_session=False
         )
+        session.flush()
+        r = session.query(Administrators).filter(
+            Administrators.id == entity.id,
+        )
+        print(r)
         return ObjectDict(dictize(r.one()))
 
 
@@ -227,7 +237,7 @@ class AdministratorOverviewsQuery(BaseQuerySet):
         r = self.r.one_or_none()
         if r is None:
             return None
-        return ObjectDict(dictize(self.r))
+        return ObjectDict(dictize(r))
 
 
 class AdministratorsOverviewsQuery(BaseQuerySet):

@@ -10,6 +10,7 @@ from bidong.service.v2.domain.ValueObjects import Resource, Auth
 from bidong.service.v2.domain.DomainTools import *
 from bidong.service.v2.domain import REVERSED_CLIENT_RESOURCES_MAP, REVERSED_PLATFORM_RESOURCES_MAP, \
     PLATFORM_RESOURCES_MAP, CLIENT_RESOURCES_MAP
+from pprint import pprint
 
 DEFAULT_METHOD_LIST = ["DELETE", "PUT", "POST", "GET"]
 
@@ -30,6 +31,9 @@ class AdministratorAuthsDomain(object):
 
     def construct_entities(self):
         if self._resources_auths:
+            print("-")
+            pprint(self._resources_auths)
+            print("-")
             self.reset(self._resources_auths)
         else:
             self._construct_current_entities()
@@ -42,7 +46,7 @@ class AdministratorAuthsDomain(object):
             auth_entity = self.AdministratorAuthEntity(self.id,
                                                        Resource(q.resource_name,
                                                                 q.resource_locator,
-                                                                resource_type=AdministratorsAuthsQuery.FEATURE),
+                                                                resource_type=Resource.FEATURE),
                                                        Auth(self.id,
                                                             status=q.status,
                                                             allow_method=q.allow_method))
@@ -53,7 +57,7 @@ class AdministratorAuthsDomain(object):
             auth_entity = self.AdministratorAuthEntity(self.id,
                                                        Resource(q.resource_name,
                                                                 q.resource_locator,
-                                                                resource_type=AdministratorsAuthsQuery.DATA),
+                                                                resource_type=Resource.DATA),
                                                        Auth(self.id,
                                                             status=q.status,
                                                             allow_method=q.allow_method))
@@ -74,10 +78,12 @@ class AdministratorAuthsDomain(object):
         authorizations.data = []
 
         for each in self.auth_entities_map.values():
-            if each.resource.resource_type == AdministratorsAuthsQuery.DATA:
+            if each.auth.status != Auth.ENABLED:
+                continue
+            if each.resource.resource_type == Resource.DATA:
                 item = ObjectDict(dictize(self.AdministratorAuthDataVO(each.resource, each.auth)))
                 authorizations.data.append(item)
-            if each.resource.resource_type == AdministratorsAuthsQuery.FEATURE:
+            if each.resource.resource_type == Resource.FEATURE:
                 item = ObjectDict(dictize(self.AdministratorAuthFeatureVO(each.resource, each.auth)))
                 authorizations.features.append(item)
 
@@ -97,7 +103,7 @@ class AdministratorAuthsDomain(object):
         self._construct_current_entities()
 
         # 计算得到新的权限实体
-        existing = {key: value.auth.allow_method for key, value in self.auth_entities_map.items()}
+        existing = {key: value for key, value in self.auth_entities_map.items()}
         pending = {(self.id, resource.name, str(resource.locator)): ensure_method_as_int(auth.allow_method)
                    for (resource, auth) in resources_auths}
         union = set(pending).union(existing)
@@ -105,24 +111,22 @@ class AdministratorAuthsDomain(object):
         to_update = set(pending).intersection(existing)
         to_create = set(union).difference(existing)
         for key in to_delete:
-            self.auth_entities_map[key](
-                self.AdministratorAuthEntity(self.id,
-                                             Resource(*key),
-                                             Auth(self.id, status=Auth.DELETE)))
+            self.auth_entities_map[key] = self.AdministratorAuthEntity(self.id,
+                                                                       Resource(*key[1:]),
+                                                                       Auth(self.id, status=Auth.DELETE))
         for key in to_update:
-            self.auth_entities_map[key](
-                self.AdministratorAuthEntity(self.id,
-                                             Resource(*key),
-                                             Auth(self.id,
-                                                  status=Auth.ENABLED,
-                                                  allow_method=pending[key])))
+            self.auth_entities_map[key] = self.AdministratorAuthEntity(self.id,
+                                                                       Resource(*key[1:]),
+                                                                       Auth(self.id,
+                                                                            status=Auth.ENABLED,
+                                                                            allow_method=pending[key]))
+            pprint(self.auth_entities_map[key].__dict__)
         for key in to_create:
-            self.auth_entities_map[key](
-                self.AdministratorAuthEntity(self.id,
-                                             Resource(*key),
-                                             Auth(self.id,
-                                                  status=Auth.ENABLED,
-                                                  allow_method=pending[key])))
+            self.auth_entities_map[key] = self.AdministratorAuthEntity(self.id,
+                                                                       Resource(*key[1:]),
+                                                                       Auth(self.id,
+                                                                            status=Auth.ENABLED,
+                                                                            allow_method=pending[key]))
         # 在生命周期的某个时候持久化本聚合中的实体
         return self
 
@@ -161,7 +165,9 @@ class AdministratorAuthsDomain(object):
             self.auth.allow_method = ensure_method_as_int(self.auth.allow_method)
 
         def _ensure_resource(self):
-            self.resource.id = ResourcesQuery().locate_by_name(self.resource.name).one().id
+            r = ResourcesQuery().locate_by_name(self.resource.name).one()
+            self.resource.id = r.id
+            self.resource.resource_type = r.resource_type
 
     class AdministratorAuthDataVO(object):
 
@@ -264,6 +270,9 @@ class AdministratorOverviewsDomain(object):
             self.validate()
 
         def validate(self):
+            if self.id and not self.create_time:
+                _overviews = AdministratorOverviewsQuery().get_by_id(self.id).one()
+                self.create_time = _overviews.create_time
             if not self.id:
                 self.id = generate_id(duplicate_checker=self.id_exists)
                 self.create_time = int(time.time())
@@ -276,7 +285,6 @@ class AdministratorOverviewsDomain(object):
 
 
 class AdministratorDomain(object):
-
     def __init__(self, administrator_id=None, overviews=None, resources_auths=None):
         self.overviews = None
         self.authorizations = None

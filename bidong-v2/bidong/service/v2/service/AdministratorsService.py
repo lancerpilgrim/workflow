@@ -9,7 +9,7 @@ from bidong.service.v2.domain.AdministratorsDomain import AdministratorAuthsDoma
 from bidong.common.utils import get_dict_attribute
 from bidong.core.exceptions import InvalidParametersError
 from bidong.service.v2.domain.AdministratorsDomain import AdministratorDomain
-from bidong.service.v2.service.ServiceTools import get_downsized_collection
+from bidong.service.v2.service.ServiceTools import get_downsized_collection, get_downsized_dict
 
 
 class AdministratorsQueryService(BaseCollectionService):
@@ -18,12 +18,12 @@ class AdministratorsQueryService(BaseCollectionService):
         self.id_collection = None
 
     def get_overviews(self):
-        return self.get_domain(AdministratorOverviewsDomain)
+        return self.get_domain_payload(AdministratorOverviewsDomain)
 
     def get_combination(self):
-        return self.get_domain(AdministratorDomain)
+        return self.get_domain_payload(AdministratorDomain)
 
-    def get_domain(self, domain):
+    def get_domain_payload(self, domain):
         payload = ObjectDict()
         rs, pagination = AdministratorsOverviewsQuery().exclude_deleted().paginate(self.paginator).all()
         self.id_collection = rs.keys()
@@ -42,68 +42,97 @@ class AdministratorsQueryService(BaseCollectionService):
                                                                                 "features": ["features"]    
                                                                                 }
                                                                     }
-        :return: 
+        :return: a collection of objects with attrs referred in fields
         """
         payload = ObjectDict()
-        collection = self.get_combination().objects
+        collection, pagination = self.get_combination()
         payload.objects = get_downsized_collection(collection, fields)
         return payload
 
 
 class AdministratorQueryService(BaseIndividualService):
-    pass
+
+    def __init__(self, administrator_id):
+        super(AdministratorQueryService, self).__init__()
+        self.id = administrator_id
+
+    def get_overviews(self):
+        return self.get_domain_payload(AdministratorOverviewsDomain)
+
+    def get_authorizations(self):
+        return self.get_domain_payload(AdministratorAuthsDomain)
+
+    def get_combination(self):
+        return self.get_domain_payload(AdministratorDomain)
+
+    def get_domain_payload(self, domain):
+        return domain(administrator_id=self.id).construct_entities().struct
+
+    def get_fields(self, fields):
+        return get_downsized_dict(self.get_combination(), fields)
 
 
 class AdministratorCommandService(object):
-    def __init__(self, administrator_id=None):
+    def __init__(self, administrator_id=None, overviews=None, authorizations=None):
         self.id = administrator_id
-        self.repo = AdministratorsRepo()
+        self.overviews = overviews
+        self.authorizations = authorizations
+        print(authorizations)
 
-    def integrated_create(self, overviews=None, authorizations=None):
-        item = ObjectDict({})
-        item.overviews = self._create_overviews(overviews)
-        item.authorizations = self._create_authorizations(authorizations)
-        item.id = self.id
+    def integrated_create(self):
+        resources_auths = self._format_authorizations_parameter()
+        domain = AdministratorDomain(overviews=self.overviews,
+                                     resources_auths=resources_auths).construct_entities()
+        domain.save()
+        payload = domain.struct
+
         # 初始化手机号密码登录
         from bidong.service.login import AdministratorPasswordLoginService
-        ps = AdministratorPasswordLoginService(item.overviews.mobile)
-        ps.init_user_login_info(item.id)
+        ps = AdministratorPasswordLoginService(payload.overviews.mobile)
+        ps.init_user_login_info(payload.id)
 
-        return item
+        return payload
 
-    def _create_overviews(self, overviews):
-        overviews = self.repo.create(overviews)
-        self.id = overviews.id
-        return overviews
+    def integrated_update(self):
+        resources_auths = self._format_authorizations_parameter()
+        domain = AdministratorDomain(administrator_id=self.id,
+                                     overviews=self.overviews,
+                                     resources_auths=resources_auths).construct_entities()
+        domain.save()
+        return domain.struct
 
-    def update_overviews(self, overviews=None):
-        self.repo.get_by_pk()
-        overviews = self.repo.update(overviews).one()
-        return overviews
+    def update_overviews(self):
+        domain = AdministratorOverviewsDomain(administrator_id=self.id,
+                                              overviews=self.overviews).construct_entities()
+        domain.save()
+        return domain.struct
 
-    def _create_authorizations(self, authorizations):
-        auth_service = AdministratorAuthsService(self.id)
-        authorizations_parameters = self._validate_auth_parameters(authorizations)
-        return auth_service.integrated_create_or_update(authorizations_parameters).list()
+    def update_authorizations(self):
+        resources_auths = self._format_authorizations_parameter()
+        domain = AdministratorAuthsDomain(administrator_id=self.id,
+                                          resources_auths=resources_auths).construct_entities()
+        domain.save()
+        return domain.struct
 
-    def update_authorizations(self, authorizations=None):
-        auth_service = AdministratorAuthsService(self.id)
-        authorizations_parameters = self._validate_auth_parameters(authorizations)
-        return auth_service.integrated_create_or_update(authorizations_parameters).list()
+    def delete(self):
+        domain = AdministratorOverviewsDomain(administrator_id=self.id).construct_entities()
+        domain.delete()
+        domain.save()
 
-    def integrated_update(self, overviews=None, authorizations=None):
-        item = ObjectDict({})
-        item.overviews = self.update_overviews(overviews)
-        item.authorizations = self.update_authorizations(authorizations)
-        item.id = item.overviews.id
-        return item
-
-    def _validate_auth_parameters(self, authorizations):
-        features = authorizations["features"]
+    def _format_authorizations_parameter(self):
+        features = self.authorizations.get("features", None)
+        data = self.authorizations.get("data", None)
+        parameters = []
         for feature in features:
             if "allow_method" not in feature.keys():
                 feature["allow_method"] = ["DELETE", "PUT", "POST", "GET"]
-        authorizations_parameters = [(Resource(feature["name"], ""),
-                                      Auth(self.id, feature["allow_method"]))
-                                     for feature in features]
-        return authorizations_parameters
+        for datum in data:
+            if "allow_method" not in datum.keys():
+                datum["allow_method"] = ["DELETE", "PUT", "POST", "GET"]
+        feature_parameters = [(Resource(feature["name"], ""), Auth(self.id, feature["allow_method"]))
+                              for feature in features]
+        data_parameters = [(Resource(datum["name"], datum.get("data_id")), Auth(self.id, datum["allow_method"]))
+                           for datum in data]
+        parameters.extend(feature_parameters)
+        parameters.extend(data_parameters)
+        return parameters

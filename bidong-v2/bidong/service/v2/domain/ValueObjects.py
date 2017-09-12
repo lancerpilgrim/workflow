@@ -2,6 +2,9 @@ from bidong.common.utils import ObjectDict
 
 
 class Resource(ObjectDict):
+    DATA = 2
+    FEATURE = 1
+
     def __init__(self, resource_public_name, resource_locator="", _id=None, **kwargs):
         super().__init__(**kwargs)
         self.id = _id

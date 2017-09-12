@@ -51,15 +51,16 @@ def ensure_method_as_list(method):
     return result
 
 
-def generate_id(max_retry=3, duplicate_checker=None):
+def generate_id(max_retry=3, duplicate_checker=None, length=10):
     """
+    :param length: 生成id长度
     :param max_retry: 最大重复生成次数,超过将抛出异常
     :param duplicate_checker: 查重方法,如果其返回结果为True, 将再生成一次. 
     :return: 
     """
     while max_retry > 0:
         while 1:
-            _id = "1" + generate_random_number(9)
+            _id = "1" + generate_random_number(length-1)
             if len(_id) == 10:
                 break
         if duplicate_checker:

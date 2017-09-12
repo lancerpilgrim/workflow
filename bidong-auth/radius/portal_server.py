@@ -38,15 +38,15 @@ from urlparse import parse_qs
 import mako.lookup
 import mako.template
 
-import utility
+import radius.utility as utility
 # import settings
-import config
+import radius.config as config
 import user_agents
 
-import account
-import template
+import radius.account as account
+import radius.template as template
 
-from task import portal 
+from radius.task import portal
 
 
 portal_config = config['portal_config']
@@ -576,7 +576,7 @@ class PageHandler(BaseHandler):
                     self.redirect(config['bidong'] + 'account/{}?token={}'.format(self.user['user'], token))
                     
                     if self.profile:
-                        account.update_mac_record(self.user['user'], kwargs['user_mac'], 
+                        account.update_mac_record(self.user['user'], kwargs['user_mac'],
                                                   self.profile['duration'], self.agent_str, self.brand, self.profile)
 
                     return
@@ -701,7 +701,7 @@ class PageHandler(BaseHandler):
             _user = {'user':'55532', 'password':'987012', 'mask':10, 'coin':60, 'ends':100}
             self.user = _user
         else:
-            _user = account.get_bd_user(kwargs['user_mac'], ismac=True) 
+            _user = account.get_bd_user(kwargs['user_mac'], ismac=True)
             if not _user:
                 return
 
@@ -876,7 +876,7 @@ class PageHandler(BaseHandler):
         if AC_CONFIGURE[nas_addr]['mask'] & 4:
             # bas is sangfor 
             try:
-                account.add_online2(self.user['user'], nas_addr, ap_mac, mac_addr, user_ip,  
+                account.add_online2(self.user['user'], nas_addr, ap_mac, mac_addr, user_ip,
                                     self.profile['_location'], self.profile['ssid'])
             except:
                 access_log.error('add {} online failed, mac: {}'.format(self.user['user'], mac_addr), exc_info=True)
@@ -1107,7 +1107,7 @@ class PortalHandler(BaseHandler):
         if response.status in ('SUCCESS', ) and self.profile:
             # login successfully 
             self._add_online_by_bas(ac_ip, ap_mac, user_mac, user_ip)
-            account.update_mac_record(self.user['user'], user_mac, 
+            account.update_mac_record(self.user['user'], user_mac,
                                       self.profile['duration'], self.agent_str, self.brand, self.profile)
             yield tornado.gen.sleep(0.5)
         else:
@@ -1170,7 +1170,7 @@ class PortalHandler(BaseHandler):
             # bas is gateway or close accounting package
             # portal manage client online & offline
             try:
-                account.add_online2(self.user['user'], nas_addr, ap_mac, mac_addr, user_ip,  
+                account.add_online2(self.user['user'], nas_addr, ap_mac, mac_addr, user_ip,
                                     self.profile['_location'], self.profile['ssid'])
             except:
                 access_log.error('add {} online failed, mac: {}'.format(self.user['user'], mac_addr), exc_info=True)

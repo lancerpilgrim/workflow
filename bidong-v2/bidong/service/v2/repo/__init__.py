@@ -32,7 +32,7 @@ class BaseQuerySet(object):
         raise NotImplementedError
 
 
-class ResourceRepo(BaseQuerySet):
+class ResourceQuery(BaseQuerySet):
     def __init__(self, resource_name="", resource_id=None):
         self.r = None
         self.resource_name = resource_name
