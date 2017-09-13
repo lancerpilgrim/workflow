@@ -7,26 +7,38 @@ from bidong.service.v2.domain.ManagersDomain import (
     ManagerDomain
 )
 from bidong.service.v2.domain.ValueObjects import Resource, Auth
-from bidong.service.v2.repo.ManagersRepository import ManagersOverviewsQuery
+from bidong.service.v2.repo.ManagersRepository import (
+    ManagersOverviewsQuery,
+    ManagersQuery
+)
 
 
 class ManagersQueryService(BaseCollectionService):
-    def __init__(self):
+    def __init__(self, project_id=None):
         super(ManagersQueryService, self).__init__()
+        self._project_id = project_id
         self.id_collection = None
 
     def get_overviews(self):
-        return self.get_domain_payload(ManagerOverviewsDomain)
+        payload = ObjectDict()
+        # 基础信息与project无关
+        rs, pagination = ManagersQuery().exclude_deleted().paginate(self.paginator).all()
+        self.id_collection = rs.keys()
+        payload.objects = [ManagerOverviewsDomain(manager_id=_id,
+                                                  overviews=rs[_id]).construct_entities().struct
+                           for _id in self.id_collection]
+        payload.update(pagination)
+        return payload
 
     def get_combination(self):
-        return self.get_domain_payload(ManagerDomain)
-
-    def get_domain_payload(self, domain):
         payload = ObjectDict()
-        rs, pagination = ManagersOverviewsQuery().exclude_deleted().paginate(self.paginator).all()
+        # 当做一个整体查询时,需要针对project做筛选
+        rs, pagination = ManagersQuery().exclude_deleted().\
+            filter_by_project(self._project_id).paginate(self.paginator).all()
         self.id_collection = rs.keys()
-        payload.objects = [domain(manager_id=_id,
-                                  overviews=rs[_id]).construct_entities().struct
+        payload.objects = [ManagerDomain(manager_id=_id,
+                                         overviews=rs[_id],
+                                         project_id=self._project_id).construct_entities().struct
                            for _id in self.id_collection]
         payload.update(pagination)
         return payload
@@ -111,21 +123,24 @@ class ManagerCommandService(object):
         domain.save()
 
     def _format_authorizations_parameter(self):
-        features = self.authorizations.get("features", None)
-        data = self.authorizations.get("data", None)
         parameters = []
-        for feature in features:
-            if "allow_method" not in feature.keys():
-                feature["allow_method"] = ["DELETE", "PUT", "POST", "GET"]
-        for datum in data:
-            if "allow_method" not in datum.keys():
-                datum["allow_method"] = ["DELETE", "PUT", "POST", "GET"]
-        feature_parameters = [(Resource(feature["name"], ""),
-                               Auth(self.id, feature["allow_method"]))
-                              for feature in features]
-        data_parameters = [(Resource(datum["name"], datum.get("data_id")),
-                            Auth(self.id, datum["allow_method"]))
-                           for datum in data]
-        parameters.extend(feature_parameters)
-        parameters.extend(data_parameters)
+        contents = self.authorizations.get("contents")
+        for content in contents:
+            features = content.get("features", [])
+            data = content.get("data", [])
+            for feature in features:
+                if "allow_method" not in feature.keys():
+                    feature["allow_method"] = ["DELETE", "PUT", "POST", "GET"]
+            for datum in data:
+                if "allow_method" not in datum.keys():
+                    datum["allow_method"] = ["DELETE", "PUT", "POST", "GET"]
+            feature_parameters = [(Resource(feature["name"], content.get("project_id")),
+                                   Auth(self.id, feature["allow_method"]))
+                                  for feature in features]
+            data_parameters = [(Resource(datum["name"], datum.get("data_id")),
+                                Auth(self.id, datum["allow_method"]))
+                               for datum in data]
+            parameters.extend(feature_parameters)
+            parameters.extend(data_parameters)
+        print(parameters)
         return parameters

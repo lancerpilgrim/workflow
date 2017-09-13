@@ -4,7 +4,7 @@ from bidong.service.v2.repo.AdministratorsRepository import (
     AdministratorAuthsRepository,
     AdministratorsAuthsQuery,
     AdministratorOverviewsRepository, AdministratorOverviewsQuery)
-from bidong.service.v2.repo import ResourcesQuery
+from bidong.service.v2.repo import ResourceQuery
 from bidong.service.v2.domain.ValueObjects import Resource, Auth
 from bidong.service.v2.domain.DomainTools import *
 from bidong.service.v2.domain import REVERSED_CLIENT_RESOURCES_MAP, REVERSED_PLATFORM_RESOURCES_MAP, \
@@ -30,9 +30,6 @@ class AdministratorAuthsDomain(object):
 
     def construct_entities(self):
         if self._resources_auths:
-            print("-")
-            pprint(self._resources_auths)
-            print("-")
             self.reset(self._resources_auths)
         else:
             self._construct_current_entities()
@@ -87,10 +84,10 @@ class AdministratorAuthsDomain(object):
             if each.auth.status != Auth.ENABLED:
                 continue
             if each.resource.resource_type == Resource.DATA:
-                item = ObjectDict(dictize(self.AdministratorAuthDataVO(each.resource, each.auth)))
+                item = self.AdministratorAuthDataVO(each.resource, each.auth).struct
                 authorizations.data.append(item)
             if each.resource.resource_type == Resource.FEATURE:
-                item = ObjectDict(dictize(self.AdministratorAuthFeatureVO(each.resource, each.auth)))
+                item = self.AdministratorAuthFeatureVO(each.resource, each.auth).struct
                 authorizations.features.append(item)
 
         return authorizations
@@ -171,26 +168,29 @@ class AdministratorAuthsDomain(object):
             self.auth.allow_method = ensure_method_as_int(self.auth.allow_method)
 
         def _ensure_resource(self):
-            r = ResourcesQuery().locate_by_name(self.resource.name).one()
-            self.resource.id = r.id
-            self.resource.resource_type = r.resource_type
+            pass
+            # r = ResourcesQuery().locate_by_name(self.resource.name).one()
+            # self.resource.id = r.id
+            # self.resource.resource_type = r.resource_type
 
     class AdministratorAuthDataVO(object):
 
         def __init__(self, resource, auth):
             self._resource = resource
             self._auth = auth
-            self.name = None
-            self.description = None
-            self.allow_method = None
-            self.data_id = None
-            self.struct()
-
-        def struct(self):
             self.name = self._resource.name
-            self.allow_method = ensure_method_as_list(self._auth.allow_method)
             self.description = self._get_description()
+            self.allow_method = ensure_method_as_list(self._auth.allow_method)
             self.data_id = self._resource.locator
+
+        @property
+        def struct(self):
+            item = ObjectDict()
+            item.name = self.name
+            item.allow_method = self.allow_method
+            item.description = self.description
+            item.data_id = self.data_id
+            return item
 
         def _get_description(self):
             # TODO 获取名字
@@ -202,15 +202,17 @@ class AdministratorAuthsDomain(object):
         def __init__(self, resource, auth):
             self._resource = resource
             self._auth = auth
-            self.name = None
-            self.description = None
-            self.allow_method = None
-            self.struct()
-
-        def struct(self):
             self.name = self._resource.name
-            self.allow_method = ensure_method_as_list(self._auth.allow_method)
             self.description = REVERSED_PLATFORM_RESOURCES_MAP[self.name]
+            self.allow_method = ensure_method_as_list(self._auth.allow_method)
+
+        @property
+        def struct(self):
+            item = ObjectDict()
+            item.name = self.name
+            item.description = self.description
+            item.allow_method = self.allow_method
+            return item
 
 
 class AdministratorOverviewsDomain(object):

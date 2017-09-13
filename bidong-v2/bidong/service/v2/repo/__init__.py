@@ -12,6 +12,7 @@ from bidong.storage.models import (
 )
 from bidong.common.utils import ObjectDict, dictize
 from bidong.core.database import session
+from bidong.core.exceptions import InvalidParametersError
 
 
 class BaseQuerySet(object):
@@ -32,34 +33,9 @@ class BaseQuerySet(object):
         raise NotImplementedError
 
 
-class ResourceQuery(BaseQuerySet):
-    def __init__(self, resource_name="", resource_id=None):
-        self.r = None
-        self.resource_name = resource_name
-        self.resource_id = resource_id
-
-    def locate(self):
-        if self.resource_id:
-            self.r = session.query(ResourceRegistry).filter(ResourceRegistry.id == self.resource_id)
-        else:
-            self.r = session.query(ResourceRegistry).filter(
-                ResourceRegistry.public_name == self.resource_name,
-            )
-        return self
-
-    def _instantiate(self):
-        return ObjectDict(dictize(self.r.one()))
-
-
-class ResourcesRepo(BaseQuerySet):
+class ResourcesQuery(BaseQuerySet):
     def __init__(self):
         self.r = None
-
-    def generate_tree(self, resources):
-        pass
-
-    def expand_tree(self, resource_tree):
-        pass
 
     def filter_client(self):
         self.r = self.r.filter(ResourceRegistry.ascription == ResourceRegistry.CLIENT)
@@ -80,22 +56,27 @@ class ResourcesRepo(BaseQuerySet):
         return content
 
 
-class ResourcesQuery(BaseQuerySet):
+_R_ID_MAP = {each.id: each for each in ResourcesQuery().get_all_resources().all()}
+_R_NAME_MAP = {each.public_name: each for each in ResourcesQuery().get_all_resources().all()}
+
+
+class ResourceQuery(BaseQuerySet):
     def __init__(self):
         self.r = None
 
-    def locate_by_name(self, resource_name):
-        self.r = session.query(ResourceRegistry).filter(
-            ResourceRegistry.public_name == resource_name)
-        return self
+    @staticmethod
+    def locate_by_name(resource_name):
+        try:
+            return _R_NAME_MAP[resource_name]
+        except KeyError:
+            raise InvalidParametersError("Invalid Feature Name")
 
-    def exists(self):
-        if self.r.first() is not None:
-            return True
-        return False
+    @staticmethod
+    def locate_by_id(_id):
+        try:
+            return _R_ID_MAP[_id]
+        except KeyError:
+            raise InvalidParametersError("Invalid Resource ID")
 
     def _instantiate(self):
-        r = self.r.one_or_none()
-        if r is None:
-            return None
-        return ObjectDict(dictize(self.r.one()))
+        pass

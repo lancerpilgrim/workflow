@@ -20,7 +20,7 @@ from bidong.core.validates import validate_with_schema
 class ManagersHandler(CollectionsHandler):
 
     def get(self, project_id, *args, **kwargs):
-        # TODO rpoject_id
+        # TODO project_id
         service = ManagersService()
         payload = service.get_details(self.page, self.per_page)
         payload = ManagersOutputSchema().dump(payload).data

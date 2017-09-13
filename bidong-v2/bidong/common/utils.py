@@ -191,5 +191,7 @@ def get_dict_attribute(resource_dict, attr):
     return attr_hierarchy[-1], value
 
 
-def get_current_timestamp():
-    return int(time.time())
+def get_current_timestamp(integer=True):
+    if integer:
+        return int(time.time())
+    return time.time()

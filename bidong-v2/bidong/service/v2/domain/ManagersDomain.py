@@ -1,15 +1,13 @@
 from bidong.core.exceptions import NotFoundError
 from bidong.common.utils import ObjectDict, dictize, get_current_timestamp
+from bidong.service.v2.repo import ResourceQuery
 from bidong.service.v2.repo.ManagersRepository import (
     ManagerAuthsRepository,
     ManagersAuthsQuery,
     ManagerOverviewsRepository, ManagerOverviewsQuery)
-from bidong.service.v2.repo import ResourcesQuery
 from bidong.service.v2.domain.ValueObjects import Resource, Auth
 from bidong.service.v2.domain.DomainTools import *
-from bidong.service.v2.domain import REVERSED_CLIENT_RESOURCES_MAP, REVERSED_PLATFORM_RESOURCES_MAP, \
-    PLATFORM_RESOURCES_MAP, CLIENT_RESOURCES_MAP
-from pprint import pprint
+from bidong.service.v2.domain import REVERSED_CLIENT_RESOURCES_MAP
 
 DEFAULT_METHOD_LIST = ["DELETE", "PUT", "POST", "GET"]
 
@@ -19,14 +17,17 @@ class ManagerAuthsDomain(object):
     平台管理员的权限聚合
     """
 
-    def __init__(self, manager_id, resources_auths=None):
+    def __init__(self, manager_id, resources_auths=None, project_id=None):
+        # 初始化参数包括了manager权限几个维度:
+        # 作为实体id的manager_id, 资源值对象resourceVO, 针对该资源值对象的授权值对象authVO,
+        # resourceVO和authVO构成了一个完整权限值对象, 它从属于某个由project_id标识的project
+        # 由此构建出manager的权限领域模型.
+        # 无论构建方式是查询已有数据库还是根据输入参数, 持久化时调用者不能作出区分, 请注意这一点
         self.id = manager_id
         self._resources_auths = resources_auths
+        self._project_id = project_id
         self.auth_entities_map = {}
         self.auth_entities_list = None
-        # 实际上, auth_entity的真正的实体id是它在auth_entities中的key, 因为这个key被设计成独一无二
-        # 在仓储中, id已经存在的实体会执行更新操作, id不存在的则执行新建操作, 这不需要被Domain感知到
-        # Repository只包含Command, 实际只需要GetByEntityId和Save即可, Query由专门的Query类承担.
 
     def construct_entities(self):
         if self._resources_auths:
@@ -36,9 +37,12 @@ class ManagerAuthsDomain(object):
         return self
 
     def _construct_current_entities(self):
-        # 功能性资源
-        query, p = ManagersAuthsQuery().list_user_features(self.id).all()
-        for q in query:
+        # 功能性资源, 一条feature-auth从属于某一个project
+        fquery = ManagersAuthsQuery().list_user_features(self.id)
+        if self._project_id:
+            fquery = fquery.filter_by_project(self._project_id)
+        query_set, p = fquery.all()
+        for q in query_set:
             auth_entity = self.ManagerAuthEntity(self.id,
                                                  Resource(q.resource_name,
                                                           q.resource_locator,
@@ -47,9 +51,13 @@ class ManagerAuthsDomain(object):
                                                       status=q.status,
                                                       allow_method=q.allow_method))
             self.auth_entities_map[(self.id, q.resource_name, q.resource_locator)] = auth_entity
+
         # 数据性资源
-        query, p = ManagersAuthsQuery().list_user_data(self.id).all()
-        for q in query:
+        dquery = ManagersAuthsQuery().list_user_data(self.id)
+        if self._project_id:
+            dquery = dquery.filter_by_project(self._project_id)
+        query_set, p = dquery.all()
+        for q in query_set:
             auth_entity = self.ManagerAuthEntity(self.id,
                                                  Resource(q.resource_name,
                                                           q.resource_locator,
@@ -81,23 +89,23 @@ class ManagerAuthsDomain(object):
         for each in self.auth_entities_map.values():
             if each.auth.status != Auth.ENABLED:
                 continue
-            locator = each.resource.locator
-            project_id = locator
             if each.resource.resource_type == Resource.DATA:
-                # todo 这里暂时是没有的
-                avo = ObjectDict(dictize(self.ManagerAuthDataVO(each.resource, each.auth)))
-                if project_id in authorizations.contents:
-                    if hasattr(authorizations.contents[project_id], "data"):
-                        authorizations.contents[project_id].data.append(avo)
+                # todo 这个分支暂时不会被运行
+                avo = self.ManagerAuthDataVO(each.resource, each.auth).struct
+                data_id = each.resource.locator
+                if data_id in authorizations.contents:
+                    if hasattr(authorizations.contents[data_id], "data"):
+                        authorizations.contents[data_id].data.append(avo)
                     else:
-                        authorizations.contents[project_id].data = [avo]
+                        authorizations.contents[data_id].data = [avo]
                 else:
                     item = ObjectDict()
                     item.data = [avo]
                     item.project_id = each.resource.locator
-                    authorizations.contents[project_id] = item
+                    authorizations.contents[data_id] = item
             if each.resource.resource_type == Resource.FEATURE:
-                fvo = ObjectDict(dictize(self.ManagerAuthFeatureVO(each.resource, each.auth)))
+                fvo = self.ManagerAuthFeatureVO(each.resource, each.auth).struct
+                project_id = each.resource.locator
                 if project_id in authorizations.contents:
                     if hasattr(authorizations.contents[project_id], "features"):
                         authorizations.contents[project_id].features.append(fvo)
@@ -115,8 +123,8 @@ class ManagerAuthsDomain(object):
     def reset(self, resources_auths):
         """
         :brief 完整地重新定义所有权限，不在auths列表中的原有权限都将被置为DELETE状态, 已经存在的将被更新,
-               新增的权限将被创建. 权限设置的逻辑是这样的: 对于前端来说实现patch式的更新是相对繁琐的操作,
-               所以在实现上, 每次都会重新定义一个用户的权限, 即Reset. 这种情况下新建和更新是同一的.
+               新增的权限将被创建. 权限设置的逻辑是这样的: 不支持patch式的更新
+               所以在实现上, 每次更新实质上是重新定义一遍用户的权限, 即Reset. 这种情况下新建和更新是同一的.
         :param resources_auths: a nested list [(resource, auth), ....]
                resource: a instance of Resource,
                auth: a instance of Auth
@@ -187,7 +195,7 @@ class ManagerAuthsDomain(object):
             self.auth.allow_method = ensure_method_as_int(self.auth.allow_method)
 
         def _ensure_resource(self):
-            r = ResourcesQuery().locate_by_name(self.resource.name).one()
+            r = ResourceQuery().locate_by_name(self.resource.name)
             self.resource.id = r.id
             self.resource.resource_type = r.resource_type
 
@@ -196,17 +204,19 @@ class ManagerAuthsDomain(object):
         def __init__(self, resource, auth):
             self._resource = resource
             self._auth = auth
-            self.name = None
-            self.description = None
-            self.allow_method = None
-            self.data_id = None
-            self.struct()
-
-        def struct(self):
             self.name = self._resource.name
-            self.allow_method = ensure_method_as_list(self._auth.allow_method)
             self.description = self._get_description()
+            self.allow_method = ensure_method_as_list(self._auth.allow_method)
             self.data_id = self._resource.locator
+
+        @property
+        def struct(self):
+            item = ObjectDict()
+            item.name = self.name
+            item.allow_method = self.allow_method
+            item.description = self.description
+            item.data_id = self.data_id
+            return item
 
         def _get_description(self):
             # TODO 获取名字
@@ -218,15 +228,17 @@ class ManagerAuthsDomain(object):
         def __init__(self, resource, auth):
             self._resource = resource
             self._auth = auth
-            self.name = None
-            self.description = None
-            self.allow_method = None
-            self.struct()
-
-        def struct(self):
             self.name = self._resource.name
-            self.allow_method = ensure_method_as_list(self._auth.allow_method)
             self.description = REVERSED_CLIENT_RESOURCES_MAP[self.name]
+            self.allow_method = ensure_method_as_list(self._auth.allow_method)
+
+        @property
+        def struct(self):
+            item = ObjectDict()
+            item.name = self.name
+            item.description = self.description
+            item.allow_method = self.allow_method
+            return item
 
 
 class ManagerOverviewsDomain(object):
@@ -312,7 +324,8 @@ class ManagerOverviewsDomain(object):
 
 
 class ManagerDomain(object):
-    def __init__(self, manager_id=None, overviews=None, resources_auths=None):
+    def __init__(self, manager_id=None, overviews=None,
+                 resources_auths=None, project_id=None):
         self.overviews = None
         self.authorizations = None
         self.id = None
@@ -321,13 +334,19 @@ class ManagerDomain(object):
         self._id = manager_id
         self._overviews = overviews
         self._resources_auths = resources_auths
+        self._project_id = project_id
 
     def construct_entities(self):
+        t1 = get_current_timestamp(integer=False)
         self.od = ManagerOverviewsDomain(self._id, self._overviews)
         self.overviews = self.od.construct_entities().struct
+        t2 = get_current_timestamp(integer=False)
+        print("ov construct cost:{0}".format(t2-t1))
         self.id = self.overviews.id
-        self.ad = ManagerAuthsDomain(self.id, self._resources_auths)
+        self.ad = ManagerAuthsDomain(self.id, self._resources_auths, self._project_id)
         self.authorizations = self.ad.construct_entities().struct
+        t3 = get_current_timestamp(integer=False)
+        print("au construct cost:{0}".format(t3 - t2))
         return self
 
     @property

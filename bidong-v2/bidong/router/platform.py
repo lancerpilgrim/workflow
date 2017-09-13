@@ -85,4 +85,17 @@ routers = [
 
     (r'/{version}/test/managers$'.format(version=version),
      test.ManagersHandler),
+(r'/{version}/test/managers/(?P<manager_id>\d+)$'.format(version=version),
+     test.ManagerHandler),
+    (r'/{version}/test/managers/(?P<manager_id>\d+)/overviews$'.format(version=version),
+     test.ManagerOverviewsHandler),
+    (r'/{version}/test/managers/(?P<manager_id>\d+)/authorizations$'.format(version=version),
+     test.ManagerAuthorizationsHandler),
+
+    (r'/v1.0/test/projects$', test.ProjectsHandler),
+    (r'/v1.0/test/projects/(?P<project_id>\d+)$', test.ProjectHandler),
+    (r'/v1.0/test/projects/(?P<project_id>\d+)/authorizations$', test.ProjectAuthorizationHandler),
+    (r'/v1.0/test/projects/(?P<project_id>\d+)/overviews$', test.ProjectOverviewHandler),
+    (r'/v1.0/test/projects-resources$', test.ProjectsFeaturesHandler),
+
 ]

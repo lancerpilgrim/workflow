@@ -1,10 +1,10 @@
-from bidong.service.v2.repo import ResourcesRepo
+from bidong.service.v2.repo import ResourcesQuery
 
 
 def __map_resource_name():
     _ = {}
     __ = {}
-    r = ResourcesRepo()
+    r = ResourcesQuery()
     all_resources = r.get_all_resources().all()
     for each in all_resources:
         if each.ascription == 1:

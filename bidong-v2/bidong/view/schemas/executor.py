@@ -78,7 +78,6 @@ class ManagerOverviewsInputSchema(IndividualBaseSchema):
     id = fields.Integer()
     name = fields.String()
     mobile = fields.Integer()
-    create_time = fields.Integer()
     description = fields.String()
     status = fields.Integer()
 

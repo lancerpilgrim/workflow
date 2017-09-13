@@ -1,36 +1,4 @@
-# 一九二七年春，帕斯捷尔纳克致茨维塔耶娃:
-#
-# 　　我们多么草率地成为了孤儿。玛琳娜，
-# 　　这是我最后一次呼唤你的名字。
-# 　　 大雪落在
-# 　　我锈迹斑斑的气管和肺叶上，
-# 　　说吧：今夜，我的嗓音是一列被截停的火车，
-# 　　你的名字是俄罗斯漫长的国境线。
-# 　　
-# 　　我想象我们的相遇，在一场隆重的死亡背面
-# 　　（玫瑰的矛盾贯穿了他硕大的心）；
-# 　　在一九二七年春夜，我们在国境线相遇
-# 　　因此错过了
-# 　　 这个呼啸着奔向终点的世界。
-# 　　而今夜，你是舞曲，世界是错误。
-# 　　
-# 　　当新年的钟声敲响的时候，百合花盛放
-# 　　——他以他的死宣告了世纪的终结，
-# 　　而不是我们尴尬的生存。
-# 　　 为什么我要对你们沉默？
-# 　　当华尔兹舞曲奏起的时候，我在谢幕。
-# 　　因为今夜，你是旋转，我是迷失。
-# 　　
-# 　　当你转换舞伴的时候，我将在世界的留言册上
-# 　　抹去我的名字。
-# 　　 玛琳娜，国境线的舞会
-# 　　停止，大雪落向我们各自孤单的命运。
-# 　　我歌唱了这寒冷的春天，我歌唱了我们的废墟
-# 　　……然后我又将沉默不语。
-# 　　
-# 　　
-# 　　 1999.4.27
-
+# 一九二七年春，帕斯捷尔纳克致茨维塔耶娃
 
 from bidong.core.database import session
 from bidong.core.paginator import Paginator
@@ -133,6 +101,10 @@ class ManagersAuthsQuery(BaseQuerySet):
             ResourceRegistry, ManagersAuthorization.resource_id == ResourceRegistry.id).filter(
             ResourceRegistry.resource_type == ResourceRegistry.DATA
         )
+        return self
+
+    def filter_by_project(self, project_id):
+        self.r = self.r.filter(ManagersAuthorization.resource_locator == project_id)
         return self
 
     def locate_user_auth_by_resource(self, manager_id, resource):
@@ -283,6 +255,44 @@ class ManagersOverviewsQuery(BaseQuerySet):
         return self
 
     def _instantiate(self):
+        rs = ObjectDict()
+        pagination = ObjectDict()
+        if self.paginator is None:
+            rs.update({each.id: ObjectDict(dictize(each)) for each in self.r.all()})
+        else:
+            if self.paginator.sort:
+                self.r = self.r.order_by(self.paginator.sort)
+            p = Paginator(self.r, self.paginator.page, self.paginator.per_page).to_dict()
+            rs.update({each.id: ObjectDict(dictize(each)) for each in p.pop("objects")})
+            pagination = p
+        return rs, pagination
+
+
+class ManagersQuery(BaseQuerySet):
+    def __init__(self):
+        self.r = session.query(Managers)
+        self.paginator = None
+
+    def paginate(self, paginator):
+        self.paginator = paginator
+        page = self.paginator.get("page")
+        per_page = self.paginator.get("per_page")
+        if not page or not per_page:
+            self.paginator = None
+        return self
+
+    def exclude_deleted(self):
+        self.r = self.r.filter(Managers.status.in_((Managers.ENABLED, Managers.DISABLED)))
+        return self
+
+    def filter_by_project(self, project_id):
+        if project_id:
+            self.r = self.r.filter(
+                ManagersAuthorization.authorization_holder == Managers.id,
+                ManagersAuthorization.resource_locator == project_id).distinct()
+        return self
+
+    def _instantiate(self, *args, **kwargs):
         rs = ObjectDict()
         pagination = ObjectDict()
         if self.paginator is None:
